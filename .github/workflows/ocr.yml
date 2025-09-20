@@ -38,7 +38,10 @@ jobs:
           const outputDir = process.cwd();
           const baseUrl = 'https://yannkerherve.github.io/secretaires/ocristeur.htm';
 
-          const browser = await puppeteer.launch({headless: true});
+          const browser = await puppeteer.launch({
+                headless: true,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+              });
           const page = await browser.newPage();
 
           for(const pdfFile of pdfs){
