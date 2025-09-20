@@ -274,14 +274,15 @@ async function downloadCsv(){
     allText.push(cleanedText);
   }
 
-  const csvContent = allText.join('/newpage/');
+  const csvContent = allText.join('/newpage/'); 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  window.downloadCsvBlob = blob; // <-- important pour Puppeteer
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = 'OCR_result.csv';
-  window.downloadCsvBlob = blob;
   link.click();
   statusEl.textContent='CSV téléchargé !';
+
 }
 
 // --------- DOCX Download ----------
@@ -321,4 +322,5 @@ if(pdfUrl){
 </script>
 </body>
 </html>
+
 
