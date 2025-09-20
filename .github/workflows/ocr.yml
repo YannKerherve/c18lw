@@ -52,13 +52,16 @@ jobs:
             // Attendre que le bouton CSV soit actif - max 10 heures !
             await page.waitForSelector('#downloadCsvBtn:not([disabled])', { timeout: 36000000 });
 
-            // Attendre que la page indique que le CSV est prêt
+            // Attendre que le bouton CSV soit actif
+            await page.waitForSelector('#downloadCsvBtn:not([disabled])', { timeout: 36000000 });
+            
+            // Attendre que le CSV ait été généré (blob défini)
             await page.waitForFunction(
-              () => document.getElementById('status').textContent.includes('CSV prêt à télécharger !'),
+              () => window.downloadCsvBlob !== undefined,
               { timeout: 36000000 }
             );
-
-            // Récupérer le CSV exposé dans window.downloadCsvBlob
+            
+            // Récupérer le CSV exposé
             const csvContent = await page.evaluate(() => {
               return new Promise(resolve => {
                 const reader = new FileReader();
