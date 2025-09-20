@@ -50,7 +50,7 @@ jobs:
             await page.goto(pdfUrl, {waitUntil: 'networkidle2'});
 
             // Attendre que le bouton CSV soit actif - max 10 heures !
-            await page.waitForSelector('#downloadCsvBtn:not([disabled])', { timeout: 36000000 };
+            await page.waitForSelector('#downloadCsvBtn:not([disabled])', { timeout: 36000000 });
 
             // Attendre que la page indique que le CSV est prêt
             await page.waitForFunction(
