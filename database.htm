@@ -356,10 +356,10 @@
                     <div class="pdf-details">
                         <center><div class="pdf-title" title="${pdf.title}"> ${pdf.title.split(/\s+/).slice(0,20).join(" ")}${pdf.title.split(/\s+/).length > 20 ? "..." : ""}</div></center>
                         <!---.split(/\s+/) découpe en mots, .slice(0,20).join(" ") garde les 20 premiers, le ? "..." : "" ajoute "..." seulement si le titre fait plus de 20 mots.--->
-                        <p><strong>Auteur : </strong> ${pdf.author}</p>
+                        <p><strong>Author : </strong> ${pdf.author}</p>
                         <p><strong>Date : </strong> ${pdf.date || 'Non spécifié'}</p>
-                        <p><strong>Pays : </strong> ${pdf.pays || 'Non spécifié'}</p>
-                        <p><strong>Édition : </strong> ${pdf.edition || 'Non spécifié'}</p>
+                        <p><strong>Country : </strong> ${pdf.pays || 'Non spécifié'}</p>
+                        <p><strong>Edition : </strong> ${pdf.edition || 'Non spécifié'}</p>
                         <!---<p>${pdf.description}</p>-->
                     </div>
                     <div class="pdf-link">
@@ -480,6 +480,7 @@
 
 </body>
 </html>
+
 
 
 
