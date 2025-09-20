@@ -39,29 +39,29 @@ jobs:
           const baseUrl = 'https://yannkerherve.github.io/secretaires/ocristeur.htm';
 
           const browser = await puppeteer.launch({
-                headless: true,
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
-              });
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+          });
           const page = await browser.newPage();
 
-          for(const pdfFile of pdfs){
+          for (const pdfFile of pdfs){
             const pdfUrl = `${baseUrl}?pdf=${encodeURIComponent(pdfFile)}`;
             console.log(`➡️  Traitement: ${pdfFile}`);
             await page.goto(pdfUrl, {waitUntil: 'networkidle2'});
 
-            // Attendre que le CSV soit disponible et le bouton cliquable
+            // Attendre que le bouton CSV soit actif
             await page.waitForSelector('#downloadCsvBtn:not([disabled])', {timeout: 60000});
+
+            // Récupérer le CSV exposé dans window.downloadCsvBlob
             const csvContent = await page.evaluate(() => {
-              // Touche temporaire: générer CSV dans JS et récupérer le texte
-              const blob = window.downloadCsvBlob; // À préparer dans ton code web
               return new Promise(resolve => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result);
-                reader.readAsText(blob);
+                reader.readAsText(window.downloadCsvBlob);
               });
             });
 
-            // Sauvegarder le CSV
+            // Sauvegarder le CSV avec le nom du PDF
             const outPath = path.join(outputDir, pdfFile.replace(/\.pdf$/i,'.csv'));
             fs.writeFileSync(outPath, csvContent, 'utf-8');
             console.log(`✅ CSV enregistré: ${outPath}`);
