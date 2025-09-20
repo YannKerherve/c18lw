@@ -279,6 +279,7 @@ async function downloadCsv(){
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = 'OCR_result.csv';
+  window.downloadCsvBlob = blob;
   link.click();
   statusEl.textContent='CSV téléchargé !';
 }
@@ -320,3 +321,4 @@ if(pdfUrl){
 </script>
 </body>
 </html>
+
