@@ -1,4 +1,4 @@
-name: OCR PDFs via Web
+name: OCR PDFs via Web.
 
 on:
   workflow_dispatch:
