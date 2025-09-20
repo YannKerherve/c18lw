@@ -55,7 +55,7 @@ jobs:
             // Attendre que la page indique que le CSV est prêt
             await page.waitForFunction(
               () => document.getElementById('status').textContent.includes('CSV prêt à télécharger !'),
-              { timeout: 60000 }
+              { timeout: 36000000 }
             );
 
             // Récupérer le CSV exposé dans window.downloadCsvBlob
