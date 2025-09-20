@@ -1,0 +1,35 @@
+name: Merge PDFs
+
+on:
+  workflow_dispatch:
+    inputs:
+      pdf1:
+        description: "Nom du premier PDF (ex: file1.pdf)"
+        required: true
+      pdf2:
+        description: "Nom du deuxième PDF (ex: file2.pdf)"
+        required: true
+      output:
+        description: "Nom du fichier de sortie (ex: fusion.pdf)"
+        required: false
+        default: "fusion.pdf"
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Installer pdfunite
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+
+      - name: Fusionner les PDF
+        run: pdfunite "${{ github.event.inputs.pdf1 }}" "${{ github.event.inputs.pdf2 }}" "${{ github.event.inputs.output }}"
+
+      - name: Commit du PDF fusionné
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add "${{ github.event.inputs.output }}"
+          git commit -m "Fusion PDF : ${{ github.event.inputs.pdf1 }} + ${{ github.event.inputs.pdf2 }}"
+          git push
