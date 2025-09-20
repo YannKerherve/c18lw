@@ -293,7 +293,7 @@
 
 <div class="container">
     <header>
-        <h1>Manuels de correspondance</h1>
+        <h1>C18LW - Data Base</h1></h1>
     </header>
 <div class="main-container">
     <div class="search-filters-container">
@@ -354,7 +354,8 @@
                 listItem.className = 'pdf-item';
                 listItem.innerHTML = `
                     <div class="pdf-details">
-                        <center><div class="pdf-title">${pdf.title}</div></center>
+                        <center><div class="pdf-title"> ${pdf.title.split(/\s+/).slice(0,20).join(" ")}${pdf.title.split(/\s+/).length > 20 ? "..." : ""}</div></center>
+                        <!---.split(/\s+/) découpe en mots, .slice(0,20).join(" ") garde les 20 premiers, le ? "..." : "" ajoute "..." seulement si le titre fait plus de 20 mots.--->
                         <p><strong>Auteur : </strong> ${pdf.author}</p>
                         <p><strong>Date : </strong> ${pdf.date || 'Non spécifié'}</p>
                         <p><strong>Pays : </strong> ${pdf.pays || 'Non spécifié'}</p>
@@ -479,5 +480,6 @@
 
 </body>
 </html>
+
 
 
