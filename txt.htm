@@ -119,7 +119,7 @@
                     if (rowFilename === filename) {
                         found = true;
                         // Afficher chaque page (chaque colonne du CSV)
-                        for (let i = 1; i < columns.length; i++) {
+                        for (let i = 2; i < columns.length; i++) {
                             const pageContent = columns[i].replace(/"/g, '').trim(); // Nettoyer et enlever les espaces
 
                             const box = document.createElement('div');
@@ -144,3 +144,4 @@
 </body>
 
 </html>
+
