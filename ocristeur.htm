@@ -125,7 +125,6 @@ const zoom = $('#zoom');
 const zoomVal = $('#zoomVal');
 const rerunBtn = $('#rerunOcr');
 const aiBtn = $('#aiCorrectionBtn');
-//const downloadBtn = $('#downloadDocxBtn');
 const downloadBtn = $('#downloadCsvBtn');
 
 let pdfDoc = null;
@@ -142,12 +141,14 @@ langSel.addEventListener('change', () => runOcr(true));
 zoom.addEventListener('input', () => { scale=parseFloat(zoom.value); zoomVal.textContent=scale.toFixed(2)+'×'; if(pdfDoc) renderAndOcr(currentPage,false); });
 rerunBtn.addEventListener('click', ()=>runOcr(true));
 aiBtn.addEventListener('click', async ()=>{ ocrText.textContent = await applyAiCorrection(ocrText.textContent); });
-// Modification de la ligne qui gère l'événement click
-// Ancienne ligne : downloadBtn.addEventListener('click', downloadDocx);
-
 downloadBtn.addEventListener('click', downloadCsv);
 
-// --------- Open PDF ----------
+// --------- URL Query Param Helper ----------
+function getQueryParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+// --------- Open PDF from File ----------
 async function openPdf(){
   resetUI();
   const file = fileInput.files[0];
@@ -166,6 +167,24 @@ async function openPdf(){
     statusEl.textContent = `PDF chargé (${pageCount} page${pageCount>1?'s':''}). Rendu + OCR en cours…`;
     await renderAndOcr(1,true);
   }catch(e){ statusEl.textContent='Erreur de chargement du PDF : '+e.message; }
+}
+
+// --------- Open PDF from URL ----------
+async function openPdfFromUrl(url){
+  resetUI();
+  statusEl.textContent = 'Chargement du PDF depuis URL…';
+  try{
+    const task = pdfjsLib.getDocument(url);
+    pdfDoc = await task.promise;
+    pageCount = pdfDoc.numPages;
+    pageCountEl.textContent = pageCount;
+    pageNumber.value = 1;
+    pageSlider.max = pageCount;
+    pageSlider.value = 1;
+    rerunBtn.disabled=false; aiBtn.disabled=false; downloadBtn.disabled=false;
+    statusEl.textContent = `PDF chargé (${pageCount} page${pageCount>1?'s':''}). Rendu + OCR en cours…`;
+    await renderAndOcr(1,true);
+  }catch(e){ statusEl.textContent='Erreur de chargement du PDF depuis URL : '+e.message; }
 }
 
 // --------- Render Page ----------
@@ -231,6 +250,7 @@ function resetUI(){
   rerunBtn.disabled=true; aiBtn.disabled=true; downloadBtn.disabled=true;
   const ctx = pdfCanvas.getContext('2d'); ctx.clearRect(0,0,pdfCanvas.width,pdfCanvas.height);
 }
+
 // --------- CSV Download ----------
 async function downloadCsv(){
   if(!pdfDoc) return;
@@ -243,7 +263,6 @@ async function downloadCsv(){
     let key = `${i}-${langSel.value}-${scale.toFixed(2)}`;
     let text = pageCache.get(key) || '';
 
-    // Si le texte n'est pas en cache, effectuez l'OCR
     if(!text){
       const { data } = await Tesseract.recognize(pdfCanvas, langSel.value);
       text = (data && data.text ? data.text.trim() : '');
@@ -251,23 +270,19 @@ async function downloadCsv(){
       pageCache.set(key, text);
     }
 
-    // Remplacez les sauts de ligne pour éviter les erreurs de format CSV et ajoutez des guillemets
-    // pour garantir que le texte soit considéré comme une seule cellule
     const cleanedText = `"${text.replace(/"/g, '""').replace(/\n/g, ' ')}"`;
     allText.push(cleanedText);
   }
 
-  // Joignez tous les textes de page en une seule ligne CSV
-  const csvContent = allText.join(',');
+  const csvContent = allText.join('/newpage/');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = 'OCR_result.csv';
   link.click();
-
   statusEl.textContent='CSV téléchargé !';
 }
+
 // --------- DOCX Download ----------
 async function downloadDocx(){
   if(!pdfDoc) return;
@@ -295,6 +310,12 @@ async function downloadDocx(){
   link.download = 'OCR_result.docx';
   link.click();
   statusEl.textContent='DOCX téléchargé !';
+}
+
+// --------- Charger automatiquement depuis URL si paramètre ?pdf= existe ----------
+const pdfUrl = getQueryParam("pdf");
+if(pdfUrl){
+  openPdfFromUrl(pdfUrl);
 }
 </script>
 </body>
