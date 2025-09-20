@@ -49,8 +49,14 @@ jobs:
             console.log(`➡️  Traitement: ${pdfFile}`);
             await page.goto(pdfUrl, {waitUntil: 'networkidle2'});
 
-            // Attendre que le bouton CSV soit actif
-            await page.waitForSelector('#downloadCsvBtn:not([disabled])', {timeout: 60000});
+            // Attendre que le bouton CSV soit actif - max 10 heures !
+            await page.waitForSelector('#downloadCsvBtn:not([disabled])', { timeout: 36000000 };
+
+            // Attendre que la page indique que le CSV est prêt
+            await page.waitForFunction(
+              () => document.getElementById('status').textContent.includes('CSV prêt à télécharger !'),
+              { timeout: 60000 }
+            );
 
             // Récupérer le CSV exposé dans window.downloadCsvBlob
             const csvContent = await page.evaluate(() => {
