@@ -175,7 +175,7 @@
         function parseCSV(csvString) {
             const lines = csvString.trim().split('\n');
             return lines.map(line => {
-                const columns = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                const columns = line.split('/newpage/');
                 return columns.map(col => col.replace(/"/g, '').trim());
             });
         }
@@ -239,4 +239,5 @@
     });
 </script>
 </body>
+
 </html>
