@@ -111,7 +111,8 @@
                     // MODIFICATION ICI :
                     // Ancienne ligne (pour les virgules) : const columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     // Nouvelle ligne (pour les points-virgules) :
-                    const columns = row.split(/;(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    const columns = row.split('/newpage/');
+
 
                     const rowFilename = columns[0].replace(/"/g, ''); // Nettoyer les guillemets si présents
 
@@ -141,4 +142,5 @@
     </script>
 
 </body>
+
 </html>
