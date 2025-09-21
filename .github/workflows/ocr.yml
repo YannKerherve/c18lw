@@ -1,4 +1,4 @@
-name: OCR PDFs via Web.
+name: OCR PDFs
 
 on:
   workflow_dispatch:
@@ -6,84 +6,83 @@ on:
       pdfs:
         description: 'Liste de PDFs à traiter (séparés par des virgules)'
         required: true
-        default: '2.pdf,3.pdf'
+        default: "2.pdf,3.pdf"
 
 jobs:
   ocr:
     runs-on: ubuntu-latest
-    steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    timeout-minutes: 600  # 10 heures
 
-      # 2️⃣ Setup Node.js
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      # 3️⃣ Install dependencies
       - name: Install dependencies
-        run: npm install puppeteer fs-extra
-
-      # 4️⃣ Run Puppeteer OCR for each PDF
-      - name: Run OCR via headless browser
         run: |
-          node <<'EOF'
-          import fs from 'fs-extra';
-          import path from 'path';
-          import puppeteer from 'puppeteer';
+          npm install puppeteer
 
-          const pdfs = process.env.PDFS.split(',').map(p => p.trim());
-          const outputDir = process.cwd();
-          const baseUrl = 'https://yannkerherve.github.io/secretaires/ocristeur.htm';
+      - name: Create download folder
+        run: mkdir -p downloads
 
-          const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-          });
-          const page = await browser.newPage();
+      - name: Run OCR on PDFs
+        run: |
+          IFS=',' read -ra FILES <<< "${{ github.event.inputs.pdfs }}"
+          for pdf in "${FILES[@]}"; do
+            echo "➡️ Traitement: $pdf"
 
-          for (const pdfFile of pdfs){
-            const pdfUrl = `${baseUrl}?pdf=${encodeURIComponent(pdfFile)}`;
-            console.log(`➡️  Traitement: ${pdfFile}`);
-            await page.goto(pdfUrl, {waitUntil: 'networkidle2'});
+            node <<'EOF'
+import puppeteer from 'puppeteer';
+import path from 'path';
+import fs from 'fs';
 
-            // Attendre que le bouton CSV soit actif - max 10 heures !
-            await page.waitForSelector('#downloadCsvBtn:not([disabled])', { timeout: 36000000 });
+(async () => {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox'],
+  });
 
-            // Attendre que le bouton CSV soit actif
-            await page.waitForSelector('#downloadCsvBtn:not([disabled])', { timeout: 36000000 });
-            
-            // Attendre que le CSV ait été généré (blob défini)
-            await page.waitForFunction(
-              () => window.downloadCsvBlob !== undefined,
-              { timeout: 36000000 }
-            );
-            
-            // Récupérer le CSV exposé
-            const csvContent = await page.evaluate(() => {
-              return new Promise(resolve => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.readAsText(window.downloadCsvBlob);
-              });
-            });
+  const page = await browser.newPage();
 
-            // Sauvegarder le CSV avec le nom du PDF
-            const outPath = path.join(outputDir, pdfFile.replace(/\.pdf$/i,'.csv'));
-            fs.writeFileSync(outPath, csvContent, 'utf-8');
-            console.log(`✅ CSV enregistré: ${outPath}`);
-          }
+  // Téléchargement dans le dossier du workflow
+  const downloadPath = path.resolve('downloads');
+  await page._client().send('Page.setDownloadBehavior', {
+    behavior: 'allow',
+    downloadPath,
+  });
 
-          await browser.close();
-          EOF
-        env:
-          PDFS: ${{ github.event.inputs.pdfs }}
+  // Accéder à la page OCR avec le PDF en query param
+  const pdfName = process.argv[2];
+  await page.goto(`https://yannkerherve.github.io/secretaires/ocristeur.htm?pdf=${pdfName}`, { waitUntil: 'networkidle2' });
 
-      # 5️⃣ Upload CSVs as artifact
-      - name: Upload CSVs
+  // Attendre que le CSV soit prêt (texte ajouté dans la page)
+  await page.waitForFunction(
+    () => window.downloadCsvBlob && document.body.innerText.includes("CSV pret a télécharger !"),
+    { timeout: 36000000 } // 10h
+  );
+
+  // Récupérer le Blob et l'écrire en fichier
+  const csvData = await page.evaluate(() => {
+    return Array.from(new Uint8Array(window.downloadCsvBlob.arrayBuffer ? window.downloadCsvBlob.arrayBufferSync() : new Uint8Array()));
+  });
+
+  const outputPath = path.join(downloadPath, pdfName.replace(/\.pdf$/i, '.csv'));
+  fs.writeFileSync(outputPath, Buffer.from(csvData));
+
+  console.log("✅ CSV sauvegardé:", outputPath);
+
+  await browser.close();
+})();
+EOF
+            "$pdf"
+          done
+
+      - name: Upload CSVs as artifact
         uses: actions/upload-artifact@v4
         with:
           name: ocr-csvs
-          path: "*.csv"
+          path: downloads/
