@@ -1,4 +1,5 @@
 
+
 <!-- Created: 26/08/2025 by Yann Kerhervé -->
 <!DOCTYPE html>
 <html lang="fr">
@@ -257,26 +258,39 @@
         }
 
         // Fonction de rendu des résultats
-        function renderResults(results) {
-            resultsContainer.innerHTML = '';
-            if (results.length === 0) {
-                resultsContainer.innerHTML = '<p class="no-results">No results found for this search.</p>';
-                return;
-            }
+    function renderResults(results) {
+    resultsContainer.innerHTML = '';
+    if (results.length === 0) {
+        resultsContainer.innerHTML = '<p class="no-results">No results found for this search.</p>';
+        return;
+    }
 
-            results.forEach(result => {
-                const item = document.createElement('div');
-                item.className = 'result-item';
-                item.innerHTML = `
-                    <div class="result-title">${result.title}</div>
-                    <div class="result-page">
-                        Found on ${result.page}.
-                        <a href="ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.page.split(' ')[2]}" target="_blank">Consult this manual</a>
-                    </div>
-                `;
-                resultsContainer.appendChild(item);
-            });
+    results.forEach(result => {
+        const item = document.createElement('div');
+        item.className = 'result-item';
+
+        let metadataHtml = '';
+        if(result.author || result.date || result.edition || result.country) {
+            metadataHtml = `<div class="result-metadata">
+                ${result.author ? `<strong>Author:</strong> ${result.author}<br>` : ''}
+                ${result.date ? `<strong>Date:</strong> ${result.date}<br>` : ''}
+                ${result.edition ? `<strong>Edition:</strong> ${result.edition}<br>` : ''}
+                ${result.country ? `<strong>Country:</strong> ${result.country}` : ''}
+            </div>`;
         }
+
+        item.innerHTML = `
+            <div class="result-title">${result.title}</div>
+            ${metadataHtml}
+            <div class="result-page">
+                Found on ${result.page}.
+                <a href="ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.page.split(' ')[2]}" target="_blank">Consult this manual</a>
+            </div>
+        `;
+
+        resultsContainer.appendChild(item);
+    });
+}
 
         // Fonction de traitement du CSV
         function parseCSV(csvString) {
@@ -316,7 +330,19 @@
                 }
             });
 
-            const finalResults = Array.from(searchResults).map(item => JSON.parse(item));
+            const finalResults = Array.from(searchResults).map(item => {
+                const obj = JSON.parse(item);
+                // Cherche les métadonnées correspondantes
+                const meta = metadataList.find(m => m.filename === obj.filename.split(';')[0]);
+                if(meta){
+                    obj.author = meta.author || '';
+                    obj.date = meta.date || '';
+                    obj.edition = meta.edition || '';
+                    obj.country = meta.pays || '';
+                }
+                return obj;
+            });
+
             renderResults(finalResults);
         }
 
@@ -343,6 +369,22 @@
                 console.error(error);
                 resultsContainer.innerHTML = `<p class="no-results">Data loading error: ${error.message}</p>`;
             });
+
+            let metadataList = [];
+
+            fetch('sec.txt')
+                .then(r => r.text())
+                .then(text => {
+                    let pythonLike = text.trim();
+                    if(!pythonLike.startsWith('[')) pythonLike = '[' + pythonLike + ']';
+                    metadataList = eval(pythonLike);
+                })
+                .catch(e => console.warn("Erreur chargement metadata:", e));
+
+
+
+
+
     });
 </script>
 
