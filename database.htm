@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C18LW Data Base</title>
+    <title>C18LW - Data Base</title>
     <link rel="icon" type="image/png" href="facion.png">
     <style>
         body {
@@ -328,14 +328,14 @@
     <ul class="pdf-list" id="pdfList"></ul>
 
     <footer>
-        <p>© 2025 A. Kerhervé - HCTI - Tous droits réservés. <a href='contact.htm'>Contact et aide</a></p>
+        <p>© 2025 A. Kerhervé - HCTI - all rights reserved</p>
 
     </footer>
 </div>
 
 <div id="comparer-container" class="comparer-container" style="display: none;">
     <span id="comparer-message" class="comparer-message"></span>
-    <button id="comparer-btn" disabled>Comparer les 2 ouvrages</button>
+    <button id="comparer-btn" disabled>Compare the two books</button>
 </div>
 
 <script>
@@ -399,14 +399,14 @@
         } else if (checkedBoxes.length === 1) {
             comparerContainer.style.display = 'flex';
             comparerButton.disabled = true;
-            comparerButton.textContent = 'Sélectionner un autre ouvrage';
+            comparerButton.textContent = 'Select another book';
             comparerMessage.style.display = 'none';
         } else if (checkedBoxes.length === 2) {
             const file1 = checkedBoxes[0].getAttribute('data-filename');
             const file2 = checkedBoxes[1].getAttribute('data-filename');
             comparerContainer.style.display = 'flex';
             comparerButton.disabled = false;
-            comparerButton.textContent = 'Comparer les 2 ouvrages';
+            comparerButton.textContent = 'Compare the two books';
             comparerButton.onclick = () => {
                 window.open(`comparateur.htm?ouvrage1=${file1}&ouvrage2=${file2}`, '_blank');
             };
@@ -414,9 +414,9 @@
         } else {
             comparerContainer.style.display = 'flex';
             comparerButton.disabled = true;
-            comparerButton.textContent = 'Comparer les 2 ouvrages';
+            comparerButton.textContent = 'Compare the two books';
             comparerMessage.style.display = 'inline';
-            comparerMessage.textContent = 'Veuillez sélectionner uniquement 2 ouvrages';
+            comparerMessage.textContent = 'Please select only 2 books.';
         }
     }
 
@@ -480,6 +480,7 @@
 
 </body>
 </html>
+
 
 
 
