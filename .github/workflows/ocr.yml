@@ -36,48 +36,48 @@ jobs:
             echo "➡️ Traitement: $pdf"
 
             node <<'EOF'
-import puppeteer from 'puppeteer';
-import path from 'path';
-import fs from 'fs';
-
-(async () => {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox'],
-  });
-
-  const page = await browser.newPage();
-
-  // Téléchargement dans le dossier du workflow
-  const downloadPath = path.resolve('downloads');
-  await page._client().send('Page.setDownloadBehavior', {
-    behavior: 'allow',
-    downloadPath,
-  });
-
-  // Accéder à la page OCR avec le PDF en query param
-  const pdfName = process.argv[2];
-  await page.goto(`https://yannkerherve.github.io/secretaires/ocristeur.htm?pdf=${pdfName}`, { waitUntil: 'networkidle2' });
-
-  // Attendre que le CSV soit prêt (texte ajouté dans la page)
-  await page.waitForFunction(
-    () => window.downloadCsvBlob && document.body.innerText.includes("CSV pret a télécharger !"),
-    { timeout: 36000000 } // 10h
-  );
-
-  // Récupérer le Blob et l'écrire en fichier
-  const csvData = await page.evaluate(() => {
-    return Array.from(new Uint8Array(window.downloadCsvBlob.arrayBuffer ? window.downloadCsvBlob.arrayBufferSync() : new Uint8Array()));
-  });
-
-  const outputPath = path.join(downloadPath, pdfName.replace(/\.pdf$/i, '.csv'));
-  fs.writeFileSync(outputPath, Buffer.from(csvData));
-
-  console.log("✅ CSV sauvegardé:", outputPath);
-
-  await browser.close();
-})();
-EOF
+            import puppeteer from 'puppeteer';
+            import path from 'path';
+            import fs from 'fs';
+            
+            (async () => {
+              const browser = await puppeteer.launch({
+                headless: true,
+                args: ['--no-sandbox'],
+              });
+            
+              const page = await browser.newPage();
+            
+              // Téléchargement dans le dossier du workflow
+              const downloadPath = path.resolve('downloads');
+              await page._client().send('Page.setDownloadBehavior', {
+                behavior: 'allow',
+                downloadPath,
+              });
+            
+              // Accéder à la page OCR avec le PDF en query param
+              const pdfName = process.argv[2];
+              await page.goto(`https://yannkerherve.github.io/secretaires/ocristeur.htm?pdf=${pdfName}`, { waitUntil: 'networkidle2' });
+            
+              // Attendre que le CSV soit prêt (texte ajouté dans la page)
+              await page.waitForFunction(
+                () => window.downloadCsvBlob && document.body.innerText.includes("CSV pret a télécharger !"),
+                { timeout: 36000000 } // 10h
+              );
+            
+              // Récupérer le Blob et l'écrire en fichier
+              const csvData = await page.evaluate(() => {
+                return Array.from(new Uint8Array(window.downloadCsvBlob.arrayBuffer ? window.downloadCsvBlob.arrayBufferSync() : new Uint8Array()));
+              });
+            
+              const outputPath = path.join(downloadPath, pdfName.replace(/\.pdf$/i, '.csv'));
+              fs.writeFileSync(outputPath, Buffer.from(csvData));
+            
+              console.log("✅ CSV sauvegardé:", outputPath);
+            
+              await browser.close();
+            })();
+            EOF
             "$pdf"
           done
 
