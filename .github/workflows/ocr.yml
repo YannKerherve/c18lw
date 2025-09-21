@@ -23,7 +23,7 @@ jobs:
           node-version: '20'
 
       - name: Install Puppeteer
-        run: npm install puppeteer-core
+        run: npm install puppeteer
 
       - name: Create downloads folder
         run: mkdir -p downloads
