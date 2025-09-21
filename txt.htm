@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -158,6 +159,10 @@
   </div>
     <div class="container">
         <h1 id="manualTitle">Loading...</h1>
+        <div id="metadataBox" class="content-box" style="background:#f9f9f9;">
+            <div class="page-header">Informations</div>
+            <p id="metadataContent">Loading metadata...</p>
+        </div>
         <div id="contentContainer">
         </div>
     </div>
@@ -206,6 +211,51 @@
                       titleElement.textContent = `Loading error : ${error.message}`;
                       console.error(error);
                   });
+                // Charger le fichier sec.txt (format JSON)
+
+// fetch sec.txt qui utilise des ' pour délimiter les chaînes
+fetch('sec.txt')
+  .then(response => {
+    if (!response.ok) throw new Error('sec.txt introuvable');
+    return response.text();
+  })
+  .then(text => {
+    // Entourer d'un tableau si besoin
+    let pythonLike = text.trim();
+    if (!pythonLike.startsWith('[')) {
+      pythonLike = '[' + pythonLike + ']';
+    }
+
+    // Convertir en vrai objet JS avec eval (car c'est du format Python dict)
+    let metadataList;
+    try {
+      metadataList = eval(pythonLike); // ⚠️ seulement si tu contrôles le fichier
+    } catch (e) {
+      console.error("Erreur d'interprétation Python-like :", e);
+      throw e;
+    }
+
+    // Trouver les infos du PDF courant
+    const meta = metadataList.find(item => item.filename === filename);
+    const metaBox = document.getElementById('metadataContent');
+    if (meta) {
+      metaBox.innerHTML = `
+        <strong>Title:</strong> ${meta.title}<br>
+        <strong>Author:</strong> ${meta.author}<br>
+        <strong>Date:</strong> ${meta.date}<br>
+        <strong>Edition:</strong> ${meta.edition}<br>
+        <strong>Country:</strong> ${meta.pays}
+      `;
+    } else {
+      metaBox.textContent = "No metadata found for this file.";
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    const metaBox = document.getElementById("metadataContent");
+    if (metaBox) metaBox.textContent = "Error loading metadata.";
+  });
+
 
 
             function processData(csvString) {
