@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer'; // <- complet, pas puppeteer-core
 import fs from 'fs';
 
 const pdfFile = process.argv[2];
