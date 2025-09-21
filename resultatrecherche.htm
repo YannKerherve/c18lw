@@ -1,3 +1,4 @@
+
 <!-- Created: 26/08/2025 by Yann Kerhervé -->
 <!DOCTYPE html>
 <html lang="fr">
@@ -14,6 +15,90 @@
             background-color: #f4f4f4;
             color: #333;
         }
+
+
+
+
+    /* Bouton flottant */
+    .menu-wrapper {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
+    }
+
+    .menu-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      color: black; /* texte noir */
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 60px;
+    }
+
+    .menu-button:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .menu-button img {
+      margin-bottom: 0.25rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .menu-button span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: black; /* bien noir */
+    }
+
+    /* Menu déroulant */
+    .menu-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      margin-top: 0.5rem;
+    }
+
+    .menu-panel.open {
+      max-height: 500px;
+    }
+
+    .menu-section {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-section a {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      color: black; /* texte noir */
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .menu-section a:hover {
+      background: #e5e7eb; /* gris clair */
+      color: black; /* reste noir */
+    }
+
+
+
+
+
+
+
 
         .container {
             max-width: 1000px;
@@ -107,6 +192,28 @@
     </style>
 </head>
 <body>
+
+  <!-- Bouton flottant -->
+  <div class="menu-wrapper">
+    <div id="menuToggle" class="menu-button">
+      <img src="c18lw.png" alt="Logo">
+      <span>Menu</span>
+    </div>
+
+    <!-- Contenu du menu -->
+    <div id="menuContent" class="menu-panel">
+      <!-- Bloc 1 -->
+      <div class="menu-section">
+        <a href="index.htm">Home</a>
+        <a href="database.htm">Data Base</a>
+        <a href="resultatrecherche.htm">Advance Search</a>
+      </div>
+      <!-- Bloc 2 -->
+    </div>
+  </div>
+
+
+
 
     <div class="container">
         <h1>Advanced Search in Manuals</h1>
@@ -238,6 +345,17 @@
             });
     });
 </script>
+
+  <script>
+    const toggleBtn = document.getElementById('menuToggle');
+    const menu = document.getElementById('menuContent');
+
+    toggleBtn.addEventListener('click', () => {
+      menu.classList.toggle('open');
+    });
+  </script>
+
+
 </body>
 
 </html>
