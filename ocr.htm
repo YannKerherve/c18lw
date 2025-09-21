@@ -1,6 +1,6 @@
 <!-- Created: 26/08/2025 by Yann Kerhervé -->
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -188,30 +188,30 @@
     <input type="range" id="pageSlider" min="1" value="1" step="1" style="width:200px;" />
   </div>
   <div class="group">
-    <label for="zoom">Zoom rendu</label>
+    <label for="zoom">Zoom rendered</label>
     <input type="range" id="zoom" min="1" max="3" step="0.25" value="2" />
     <span id="zoomVal">2.00×</span>
   </div>
   <div class="group">
-    <button id="rerunOcr" disabled>Relancer l'OCR</button>
-    <button id="aiCorrectionBtn" disabled>Corriger avec IA</button>
+    <button id="rerunOcr" disabled>Restart OCR</button>
+    <button id="aiCorrectionBtn" disabled>Correct with AI</button>
   </div>
 </div>
 
 <div class="split">
   <section class="panel">
-    <h3>Prévisualisation PDF</h3>
+    <h3>PDF preview</h3>
     <div class="body"><canvas id="pdfCanvas"></canvas></div>
   </section>
   <section class="panel">
-    <h3>Transcription OCR (page courante)</h3>
+    <h3>OCR transcription (current page)</h3>
     <div class="body" id="ocrText"></div>
-    <div id="status">Spécifiez un PDF via l’URL ?pdf=fichier.pdf</div>
+    <div id="status">Specify a PDF via URL ?pdf=fichier.pdf</div>
   </section>
 </div>
 
 <div class="footer">
-  Astuce : ajoutez `?pdf=monlivre.pdf&page=3` dans l’URL pour ouvrir directement la page 3.
+  Tip: add `?pdf=mylibrary.pdf&page=3` to the URL to open page 3 directly.
 </div>
 
 <!-- Librairies -->
@@ -247,7 +247,7 @@ if(pdfUrl){ openPdf(pdfUrl); }
 async function openPdf(url){
   resetUI();
   const task=pdfjsLib.getDocument(url);
-  statusEl.textContent='Chargement du PDF…';
+  statusEl.textContent='Loading PDF...';
   try{
     pdfDoc=await task.promise;
     pageCount=pdfDoc.numPages;
@@ -256,9 +256,9 @@ async function openPdf(url){
     pageNumber.value=startPage;
     pageSlider.max=pageCount; pageSlider.value=startPage;
     rerunBtn.disabled=false; aiBtn.disabled=false;
-    statusEl.textContent=`PDF chargé (${pageCount} pages). Rendu + OCR…`;
+    statusEl.textContent=`PDF loaded (${pageCount} pages). Rendu + OCR…`;
     await renderAndOcr(startPage,true);
-  }catch(e){ statusEl.textContent='Erreur de chargement : '+e.message; }
+  }catch(e){ statusEl.textContent='Loading error : '+e.message; }
 }
 
 // --------- Render ----------
@@ -294,9 +294,9 @@ async function runOcr(force=false){
     let text=(data && data.text ? data.text.trim() : '');
     text=await applyAiCorrection(text);
     pageCache.set(key,text);
-    ocrText.textContent=text||'(aucun texte détecté)';
-    statusEl.textContent='OCR terminé.';
-  }catch(e){ statusEl.textContent='Erreur OCR : '+e.message; }
+    ocrText.textContent=text||'(no text detected)';
+    statusEl.textContent='OCR over.';
+  }catch(e){ statusEl.textContent='OCR error : '+e.message; }
 }
 async function renderAndOcr(num,forceOcr=false){currentPage=num;await renderPage(num);await runOcr(forceOcr);}
 function onPageNumberChange(){let num=parseInt(pageNumber.value,10)||1;num=Math.min(Math.max(1,num),pageCount||1);pageNumber.value=num;pageSlider.value=num;if(pdfDoc)renderAndOcr(num,false);}
@@ -305,4 +305,5 @@ function resetUI(){pdfDoc=null;currentPage=1;pageCount=0;pageCache.clear();pageN
 </script>
 </body>
 </html>
+
 
