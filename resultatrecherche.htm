@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recherche Avancée</title>
+    <title>C18LW - Advanced Search</title>
     <link rel="icon" type="image/png" href="facion.png">
     <style>
         body {
@@ -109,11 +109,11 @@
 <body>
 
     <div class="container">
-        <h1>Recherche Avancée dans les Manuels</h1>
+        <h1>Advanced Search in Manuals</h1>
         <div class="search-controls">
-            <input type="text" id="search-input" placeholder="Saisissez vos mots-clés...">
+            <input type="text" id="search-input" placeholder="Enter your keywords...">
             <div class="tolerance-slider">
-                <label for="tolerance">Tolérance d'erreur :</label>
+                <label for="tolerance">Error tolerance:</label>
                 <input type="range" id="tolerance" name="tolerance" min="0" max="100" value="0">
                 <span id="tolerance-value">0%</span>
             </div>
@@ -153,7 +153,7 @@
         function renderResults(results) {
             resultsContainer.innerHTML = '';
             if (results.length === 0) {
-                resultsContainer.innerHTML = '<p class="no-results">Aucun résultat trouvé pour cette recherche.</p>';
+                resultsContainer.innerHTML = '<p class="no-results">No results found for this search.</p>';
                 return;
             }
 
@@ -163,8 +163,8 @@
                 item.innerHTML = `
                     <div class="result-title">${result.title}</div>
                     <div class="result-page">
-                        Trouvé sur ${result.page}.
-                        <a href="ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.page.split(' ')[2]}" target="_blank">Consulter ce manuel</a>
+                        Found on ${result.page}.
+                        <a href="ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.page.split(' ')[2]}" target="_blank">Consult this manual</a>
                     </div>
                 `;
                 resultsContainer.appendChild(item);
@@ -195,7 +195,7 @@
                 const title = row[1];
                 for (let i = 2; i < row.length; i++) {
                     const content = row[i];
-                    let resultPage = `la page ${i - 1}`;
+                    let resultPage = `The page ${i - 1}`;
                     const combinedContent = (i < row.length - 1) ? content + ' ' + row[i + 1] : content;
 
                     if (fuzzySearch(query, content, tolerance)) {
@@ -203,7 +203,7 @@
                     }
 
                     if (fuzzySearch(query, combinedContent, tolerance) && i < row.length - 1) {
-                        resultPage = `les pages ${i - 1} et ${i}`;
+                        resultPage = `Pages ${i - 1} and ${i}`;
                         searchResults.add(JSON.stringify({ filename, title, page: resultPage }));
                     }
                 }
@@ -224,7 +224,7 @@
         fetch('data.csv')
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Le fichier data.csv n\'a pas pu être chargé.');
+                    throw new Error('The data.csv file could not be loaded.');
                 }
                 return response.text();
             })
@@ -234,11 +234,12 @@
             })
             .catch(error => {
                 console.error(error);
-                resultsContainer.innerHTML = `<p class="no-results">Erreur de chargement des données : ${error.message}</p>`;
+                resultsContainer.innerHTML = `<p class="no-results">Data loading error: ${error.message}</p>`;
             });
     });
 </script>
 </body>
 
 </html>
+
 
