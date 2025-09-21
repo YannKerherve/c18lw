@@ -207,7 +207,7 @@
       <div class="menu-section">
         <a href="index.htm">Home</a>
         <a href="database.htm">Data Base</a>
-        <a href="resultatrecherche.htm">Advance Search</a>
+        <a href="resultatrecherche.htm">Advanced Search</a>
       </div>
       <!-- Bloc 2 -->
     </div>
@@ -316,7 +316,7 @@
                 const title = row[1];
                 for (let i = 2; i < row.length; i++) {
                     const content = row[i];
-                    let resultPage = `The page ${i - 1}`;
+                    let resultPage = `the page ${i - 1}`;
                     const combinedContent = (i < row.length - 1) ? content + ' ' + row[i + 1] : content;
 
                     if (fuzzySearch(query, content, tolerance)) {
@@ -324,9 +324,9 @@
                     }
 
                     if (fuzzySearch(query, combinedContent, tolerance) && i < row.length - 1) {
-                        resultPage = `Pages ${i - 1} and ${i}`;
+                        resultPage = ` the pages ${i - 1} and ${i}`;
                         searchResults.add(JSON.stringify({ filename, title, page: resultPage }));
-                    }
+                    }p
                 }
             });
 
@@ -401,5 +401,6 @@
 </body>
 
 </html>
+
 
 
