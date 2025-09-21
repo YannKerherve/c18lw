@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Détails du Manuel</title>
+    <title>Contents of the manual</title>
     <link rel="icon" type="image/png" href="facion.png">
     <style>
         body {
@@ -57,7 +57,7 @@
 <body>
 
     <div class="container">
-        <h1 id="manualTitle">Chargement...</h1>
+        <h1 id="manualTitle">Loading...</h1>
         <div id="contentContainer">
         </div>
     </div>
@@ -71,11 +71,11 @@
             const contentContainer = document.getElementById('contentContainer');
 
             if (!filename) {
-                titleElement.textContent = "Erreur : Aucun fichier spécifié.";
+                titleElement.textContent = "Error: No file specified.";
                 return;
             }
 
-            titleElement.textContent = `Contenu du manuel : ${filename}`;
+            titleElement.textContent = `Contents of the manual  : ${filename}`;
 
             // --- DEBUT : SIMULATION DU FICHIER CSV ---
             // Remplacez ce bloc par une requête `fetch` vers votre fichier data.csv
@@ -90,7 +90,7 @@
               fetch('data.csv')
                   .then(response => {
                       if (!response.ok) {
-                          throw new Error('Le fichier data.csv n\'a pas pu être chargé.');
+                          throw new Error('The data.csv file could not be loaded.');
                       }
                       return response.text();
                   })
@@ -98,7 +98,7 @@
                       processData(csvData);
                   })
                   .catch(error => {
-                      titleElement.textContent = `Erreur de chargement : ${error.message}`;
+                      titleElement.textContent = `Loading error : ${error.message}`;
                       console.error(error);
                   });
 
@@ -119,6 +119,7 @@
                     if (rowFilename === filename) {
                         found = true;
                         // Afficher chaque page (chaque colonne du CSV)
+                        
                         for (let i = 2; i < columns.length; i++) {
                             const pageContent = columns[i].replace(/"/g, '').trim(); // Nettoyer et enlever les espaces
 
@@ -132,7 +133,7 @@
                 }
 
                 if (!found) {
-                    contentContainer.innerHTML = '<div class="error-message">Aucun contenu trouvé pour ce fichier.</div>';
+                    contentContainer.innerHTML = '<div class="error-message">No content found for this file.</div>';
                 }
             }
 
@@ -144,5 +145,6 @@
 </body>
 
 </html>
+
 
 
