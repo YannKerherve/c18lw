@@ -324,7 +324,7 @@
                     }
 
                     if (fuzzySearch(query, combinedContent, tolerance) && i < row.length - 1) {
-                        resultPage = `pages ${i - 1} and ${i}`;
+                        resultPage = ` pages ${i - 1} and ${i}`;
                         searchResults.add(JSON.stringify({ filename, title, page: resultPage }));
                     }
                 }
@@ -401,6 +401,7 @@
 </body>
 
 </html>
+
 
 
 
