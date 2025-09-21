@@ -1,4 +1,5 @@
 
+
 <!-- Created: 26/08/2025 by Yann Kerhervé -->
 <!DOCTYPE html>
 <html lang="en">
@@ -25,6 +26,9 @@
     background: var(--bg);
     color: #333;
   }
+
+
+
      /* Bouton flottant */
     .menu-wrapper {
       position: fixed;
@@ -32,6 +36,31 @@
       left: 1rem;
       z-index: 50;
     }
+/* Bouton Info flottant à droite */
+.meta-wrapper {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;   /* bouton collé au bord droit */
+  z-index: 50;
+}
+
+/* Menu déroulant du bouton Info à droite */
+.meta-wrapper .menu-panel {
+  position: absolute;  /* nécessaire pour pouvoir placer le menu */
+  top: 100%;           /* juste en dessous du bouton */
+  right: 0;            /* bord droit du menu aligné sur le bouton */
+  left: auto;          /* annule tout left hérité */
+  width: 400px;        /* largeur du panneau */
+  text-align: left;    /* texte à gauche dans le panneau */
+  margin-top: 0.5rem;  /* petit espace sous le bouton */
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+.meta-wrapper .menu-panel.open {
+  max-height: 500px;   /* même transition que pour le menu principal */
+}
+
 
     .menu-button {
       display: flex;
@@ -98,6 +127,8 @@
       background: #e5e7eb; /* gris clair */
       color: black; /* reste noir */
     }
+
+
 
   header {
     text-align: center;
@@ -277,6 +308,25 @@
     </div>
   </div>
 
+
+  <!-- Bouton flottant métadonnées -->
+  <div class="meta-wrapper">
+    <div id="metaToggle" class="menu-button">
+      <img src="info.png" alt="Info">
+      <span>Info</span>
+    </div>
+
+    <!-- Contenu des métadonnées -->
+    <div id="metaContent" class="menu-panel">
+      <div class="menu-section" id="metadataBox">
+        Loading metadata...
+      </div>
+    </div>
+  </div>
+
+
+
+
 <div class="controls">
   <div class="group">
     <label for="pageNumber">Page</label>
@@ -415,6 +465,41 @@ function resetUI(){pdfDoc=null;currentPage=1;pageCount=0;pageCache.clear();pageN
     toggleBtn.addEventListener('click', () => {
       menu.classList.toggle('open');
     });
+
+    // --- Toggle métadonnées ---
+const metaBtn = document.getElementById('metaToggle');
+const metaPanel = document.getElementById('metaContent');
+metaBtn.addEventListener('click', () => {
+  metaPanel.classList.toggle('open');
+});
+
+// --- Charger métadonnées ---
+if(pdfUrl){
+  fetch('sec.txt')
+    .then(r=>r.text())
+    .then(text=>{
+      let pythonLike=text.trim();
+      if(!pythonLike.startsWith('[')){ pythonLike='['+pythonLike+']'; }
+      let metadataList=eval(pythonLike);
+      const meta=metadataList.find(m=>m.filename===pdfUrl);
+      const box=document.getElementById('metadataBox');
+      if(meta){
+        box.innerHTML=`
+          <strong>Title:</strong> ${meta.title}<br>
+          <strong>Author:</strong> ${meta.author}<br>
+          <strong>Date:</strong> ${meta.date}<br>
+          <strong>Edition:</strong> ${meta.edition}<br>
+          <strong>Country:</strong> ${meta.pays}
+        `;
+      } else {
+        box.textContent="No metadata found for this file.";
+      }
+    })
+    .catch(e=>{
+      document.getElementById('metadataBox').textContent="Error loading metadata.";
+    });
+}
+
   </script>
 </body>
 </html>
