@@ -1,3 +1,4 @@
+
 <!-- Created: 26/08/2025 by Yann Kerhervé -->
 <!DOCTYPE html>
 <html lang="en">
@@ -24,6 +25,79 @@
     background: var(--bg);
     color: #333;
   }
+     /* Bouton flottant */
+    .menu-wrapper {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
+    }
+
+    .menu-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      color: black; /* texte noir */
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 60px;
+    }
+
+    .menu-button:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .menu-button img {
+      margin-bottom: 0.25rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .menu-button span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: black; /* bien noir */
+    }
+
+    /* Menu déroulant */
+    .menu-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      margin-top: 0.5rem;
+    }
+
+    .menu-panel.open {
+      max-height: 500px;
+    }
+
+    .menu-section {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-section a {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      color: black; /* texte noir */
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .menu-section a:hover {
+      background: #e5e7eb; /* gris clair */
+      color: black; /* reste noir */
+    }
 
   header {
     text-align: center;
@@ -179,6 +253,29 @@
 </head>
 <body>
 <!--<header><h1>Secretaires</h1></header>-->
+ <!-- Bouton flottant -->
+  <div class="menu-wrapper">
+    <div id="menuToggle" class="menu-button">
+      <img src="logo.png" alt="Logo">
+      <span>Menu</span>
+    </div>
+
+    <!-- Contenu du menu -->
+    <div id="menuContent" class="menu-panel">
+      <!-- Bloc 1 -->
+      <div class="menu-section">
+        <a href="index.htm">Home</a>
+        <a href="database.htm">Data Base</a>
+        <a href="resultatrecherche.htm">Advance Search</a>
+      </div>
+      <!-- Bloc 2 -->
+      <div class="menu-section">
+        <a id="viewpdf" href="#">View PDF</a>
+        <a id="viewtxt" href="#">View Text</a>
+        <a id="viewocr" href="#">View OCR</a>
+      </div>
+    </div>
+  </div>
 
 <div class="controls">
   <div class="group">
@@ -225,6 +322,9 @@ const pageNumber=$('#pageNumber'), pageSlider=$('#pageSlider'), pageCountEl=$('#
 const pdfCanvas=$('#pdfCanvas'), ocrText=$('#ocrText'), statusEl=$('#status');
 const zoom=$('#zoom'), zoomVal=$('#zoomVal');
 const rerunBtn=$('#rerunOcr'), aiBtn=$('#aiCorrectionBtn');
+const viewpdfElement = document.getElementById('viewpdf');
+const viewtxtElement = document.getElementById('viewtxt');
+const viewocrElement = document.getElementById('viewocr');
 
 let pdfDoc=null, currentPage=1, scale=2.0, pageCount=0;
 const pageCache=new Map();
@@ -242,6 +342,10 @@ rerunBtn.addEventListener('click',()=>runOcr(true));
 aiBtn.addEventListener('click',async()=>{ocrText.textContent=await applyAiCorrection(ocrText.textContent);});
 
 if(pdfUrl){ openPdf(pdfUrl); }
+
+viewpdfElement.href = `${pdfUrl}`;
+viewtxtElement.href = `txt.htm?pdf=${pdfUrl}`;
+viewocrElement.href = `ocr.htm?pdf=${pdfUrl}`;
 
 // --------- Open PDF ----------
 async function openPdf(url){
@@ -303,6 +407,15 @@ function onPageNumberChange(){let num=parseInt(pageNumber.value,10)||1;num=Math.
 function onPageSliderChange(){const num=parseInt(pageSlider.value,10)||1;pageNumber.value=num;if(pdfDoc)renderAndOcr(num,false);}
 function resetUI(){pdfDoc=null;currentPage=1;pageCount=0;pageCache.clear();pageNumber.value=1;pageSlider.value=1;pageCountEl.textContent='0';ocrText.textContent='';statusEl.textContent='Spécifiez un PDF via l’URL ?pdf=fichier.pdf';rerunBtn.disabled=true;aiBtn.disabled=true;const ctx=pdfCanvas.getContext('2d');ctx.clearRect(0,0,pdfCanvas.width,pdfCanvas.height);}
 </script>
+
+  <script>
+    const toggleBtn = document.getElementById('menuToggle');
+    const menu = document.getElementById('menuContent');
+
+    toggleBtn.addEventListener('click', () => {
+      menu.classList.toggle('open');
+    });
+  </script>
 </body>
 </html>
 
