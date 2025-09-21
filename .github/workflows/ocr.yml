@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       pdfs:
-        description: 'Liste de PDFs à traiter (séparés par des virgules)'
+        description: 'Liste de PDFs à traiter, séparés par des virgules'
         required: true
-        default: "2.pdf,3.pdf"
+        default: '2.pdf'
 
 jobs:
   ocr:
@@ -20,69 +20,48 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: '20'
 
       - name: Install dependencies
         run: |
-          npm install puppeteer
-
-      - name: Create download folder
-        run: mkdir -p downloads
+          npm ci || npm install
+          mkdir -p downloads
 
       - name: Run OCR on PDFs
         run: |
           IFS=',' read -ra FILES <<< "${{ github.event.inputs.pdfs }}"
           for pdf in "${FILES[@]}"; do
             echo "➡️ Traitement: $pdf"
-
             node <<'EOF'
-            import puppeteer from 'puppeteer';
-            import path from 'path';
-            import fs from 'fs';
-            
-            (async () => {
-              const browser = await puppeteer.launch({
-                headless: true,
-                args: ['--no-sandbox'],
-              });
-            
+              import puppeteer from 'puppeteer';
+
+              const pdfFile = process.argv[2];
+              const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
               const page = await browser.newPage();
-            
-              // Téléchargement dans le dossier du workflow
-              const downloadPath = path.resolve('downloads');
-              await page._client().send('Page.setDownloadBehavior', {
-                behavior: 'allow',
-                downloadPath,
+
+              // Ouvrir la page OCR en passant le PDF
+              await page.goto(`https://yannkerherve.github.io/secretaires/ocristeur.htm?pdf=${pdfFile}`, { waitUntil: 'networkidle0', timeout: 0 });
+
+              // Attendre que le CSV soit prêt (variable globale définie dans la page)
+              await page.waitForFunction(() => window.downloadCsvBlob !== undefined, { timeout: 36000000 });
+
+              // Récupérer le blob CSV depuis la page et écrire dans downloads/
+              const buffer = await page.evaluate(async () => {
+                const arr = await window.downloadCsvBlob.arrayBuffer();
+                return Array.from(new Uint8Array(arr));
               });
-            
-              // Accéder à la page OCR avec le PDF en query param
-              const pdfName = process.argv[2];
-              await page.goto(`https://yannkerherve.github.io/secretaires/ocristeur.htm?pdf=${pdfName}`, { waitUntil: 'networkidle2' });
-            
-              // Attendre que le CSV soit prêt (texte ajouté dans la page)
-              await page.waitForFunction(
-                () => window.downloadCsvBlob && document.body.innerText.includes("CSV pret a télécharger !"),
-                { timeout: 36000000 } // 10h
-              );
-            
-              // Récupérer le Blob et l'écrire en fichier
-              const csvData = await page.evaluate(() => {
-                return Array.from(new Uint8Array(window.downloadCsvBlob.arrayBuffer ? window.downloadCsvBlob.arrayBufferSync() : new Uint8Array()));
-              });
-            
-              const outputPath = path.join(downloadPath, pdfName.replace(/\.pdf$/i, '.csv'));
-              fs.writeFileSync(outputPath, Buffer.from(csvData));
-            
-              console.log("✅ CSV sauvegardé:", outputPath);
-            
+
+              const fs = require('fs');
+              const path = `downloads/${pdfFile.replace(/\.pdf$/i, '.csv')}`;
+              fs.writeFileSync(path, Buffer.from(buffer));
+              console.log(`✅ CSV créé: ${path}`);
+
               await browser.close();
-            })();
-            EOF
-            "$pdf"
+            EOF "$pdf"
           done
 
-      - name: Upload CSVs as artifact
+      - name: Upload CSVs
         uses: actions/upload-artifact@v4
         with:
-          name: ocr-csvs
+          name: OCR-CSVs
           path: downloads/
