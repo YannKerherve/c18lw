@@ -43,7 +43,21 @@ jobs:
             console.log("Ouverture:", url);
             await page.goto(url);
           
-            // Attendre que le CSV soit prêt
+            // Récupérer le nombre total de pages du PDF
+            const totalPages = await page.evaluate(() => {
+              return (window.pdfDoc ? window.pdfDoc.numPages : 0);
+            });
+            console.log(`📄 PDF détecté avec ${totalPages} pages`);
+          
+            // Attendre que le CSV soit prêt en OCRisant toutes les pages
+            for (let i = 1; i <= totalPages; i++) {
+              console.log(`➡️ OCR page ${i}/${totalPages}...`);
+              await page.evaluate((num) => renderAndOcr(num, true), i);
+            }
+          
+            // Attendre la disponibilité du CSV final
+            console.log("⏳ Génération du CSV...");
+            await page.evaluate(() => downloadCsv());
             await page.waitForFunction(() => window.downloadCsvBlob !== undefined, { timeout: 0 });
           
             const csvBuffer = await page.evaluate(() =>
