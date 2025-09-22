@@ -11,7 +11,7 @@ on:
 jobs:
   ocr:
     runs-on: ubuntu-latest
-    timeout-minutes: 720   # 12h max (OCR long)
+    timeout-minutes: 720   # jusqu'à 12h (OCR long)
 
     steps:
       - name: Checkout repository
@@ -23,8 +23,52 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
+        run: npm install puppeteer
+
+      - name: Create OCR script
         run: |
-          npm install puppeteer
+          cat > ocr.js <<'EOF'
+          const puppeteer = require("puppeteer");
+          const fs = require("fs");
+
+          async function run(pdfName) {
+            const url = `file://${process.cwd()}/ocristeur.htm?pdf=${pdfName}`;
+            const browser = await puppeteer.launch({ headless: "new" });
+            const page = await browser.newPage();
+            page.setDefaultNavigationTimeout(0);
+
+            console.log("Ouverture:", url);
+            await page.goto(url);
+
+            // Attendre que le CSV soit prêt
+            await page.waitForFunction(() => window.downloadCsvBlob !== undefined, { timeout: 0 });
+
+            const csvBuffer = await page.evaluate(() =>
+              new Promise(res => {
+                const reader = new FileReader();
+                reader.onload = () => res(Array.from(new Uint8Array(reader.result)));
+                reader.readAsArrayBuffer(window.downloadCsvBlob);
+              })
+            );
+
+            const buffer = Buffer.from(csvBuffer);
+            const outPath = `ocr_csv/${pdfName.replace(/\.pdf$/i, ".csv")}`;
+            fs.writeFileSync(outPath, buffer);
+            console.log("✅ CSV généré:", outPath);
+
+            await browser.close();
+          }
+
+          const pdfName = process.argv[2];
+          if (!pdfName) {
+            console.error("Usage: node ocr.js <file.pdf>");
+            process.exit(1);
+          }
+          run(pdfName).catch(err => {
+            console.error("Erreur OCR:", err);
+            process.exit(1);
+          });
+          EOF
 
       - name: OCRiser PDFs
         run: |
@@ -32,39 +76,7 @@ jobs:
           IFS=',' read -ra FILES <<< "${{ github.event.inputs.pdf_files }}"
           for f in "${FILES[@]}"; do
             echo "Traitement de $f..."
-            node <<'EOF'
-              const puppeteer = require("puppeteer");
-              const fs = require("fs");
-
-              (async () => {
-                const pdfName = process.env.PDF_NAME;
-                const url = `file://${process.cwd()}/ocristeur.htm?pdf=${pdfName}`;
-                const browser = await puppeteer.launch({ headless: "new" });
-                const page = await browser.newPage();
-                page.setDefaultNavigationTimeout(0);
-
-                console.log("Ouverture:", url);
-                await page.goto(url);
-
-                // Attendre que le CSV soit prêt (ton code met le blob sur window.downloadCsvBlob)
-                await page.waitForFunction(() => window.downloadCsvBlob !== undefined, { timeout: 0 });
-
-                const csvBuffer = await page.evaluate(() =>
-                  new Promise(res => {
-                    const reader = new FileReader();
-                    reader.onload = () => res(Array.from(new Uint8Array(reader.result)));
-                    reader.readAsArrayBuffer(window.downloadCsvBlob);
-                  })
-                );
-
-                const buffer = Buffer.from(csvBuffer);
-                const outPath = `ocr_csv/${pdfName.replace(/\.pdf$/i, ".csv")}`;
-                fs.writeFileSync(outPath, buffer);
-                console.log("✅ CSV généré:", outPath);
-
-                await browser.close();
-              })();
-            EOF
+            node ocr.js "$f"
           done
 
       - name: Commit CSV results
