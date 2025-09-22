@@ -1,0 +1,78 @@
+name: OCRiser PDF
+
+on:
+  workflow_dispatch:
+    inputs:
+      pdf_files:
+        description: "Liste des PDFs à OCRiser (séparés par des virgules)"
+        required: true
+        default: "1.pdf,2.pdf"
+
+jobs:
+  ocr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 720   # 12h max (OCR long)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          npm install puppeteer
+
+      - name: OCRiser PDFs
+        run: |
+          mkdir -p ocr_csv
+          IFS=',' read -ra FILES <<< "${{ github.event.inputs.pdf_files }}"
+          for f in "${FILES[@]}"; do
+            echo "Traitement de $f..."
+            node <<'EOF'
+              const puppeteer = require("puppeteer");
+              const fs = require("fs");
+
+              (async () => {
+                const pdfName = process.env.PDF_NAME;
+                const url = `file://${process.cwd()}/ocristeur.htm?pdf=${pdfName}`;
+                const browser = await puppeteer.launch({ headless: "new" });
+                const page = await browser.newPage();
+                page.setDefaultNavigationTimeout(0);
+
+                console.log("Ouverture:", url);
+                await page.goto(url);
+
+                // Attendre que le CSV soit prêt (ton code met le blob sur window.downloadCsvBlob)
+                await page.waitForFunction(() => window.downloadCsvBlob !== undefined, { timeout: 0 });
+
+                const csvBuffer = await page.evaluate(() =>
+                  new Promise(res => {
+                    const reader = new FileReader();
+                    reader.onload = () => res(Array.from(new Uint8Array(reader.result)));
+                    reader.readAsArrayBuffer(window.downloadCsvBlob);
+                  })
+                );
+
+                const buffer = Buffer.from(csvBuffer);
+                const outPath = `ocr_csv/${pdfName.replace(/\.pdf$/i, ".csv")}`;
+                fs.writeFileSync(outPath, buffer);
+                console.log("✅ CSV généré:", outPath);
+
+                await browser.close();
+              })();
+EOF
+          done
+
+      - name: Commit CSV results
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add ocr_csv/*.csv
+          git commit -m "Ajout des CSV OCRisés" || echo "Rien à commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
