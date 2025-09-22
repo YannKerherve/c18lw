@@ -30,19 +30,22 @@ jobs:
           cat > ocr.js <<'EOF'
           const puppeteer = require("puppeteer");
           const fs = require("fs");
-
+          
           async function run(pdfName) {
             const url = `file://${process.cwd()}/ocristeur.htm?pdf=${pdfName}`;
-            const browser = await puppeteer.launch({ headless: "new" });
+            const browser = await puppeteer.launch({
+              headless: "new",
+              args: ["--no-sandbox", "--disable-setuid-sandbox"]
+            });
             const page = await browser.newPage();
             page.setDefaultNavigationTimeout(0);
-
+          
             console.log("Ouverture:", url);
             await page.goto(url);
-
+          
             // Attendre que le CSV soit prêt
             await page.waitForFunction(() => window.downloadCsvBlob !== undefined, { timeout: 0 });
-
+          
             const csvBuffer = await page.evaluate(() =>
               new Promise(res => {
                 const reader = new FileReader();
@@ -50,15 +53,15 @@ jobs:
                 reader.readAsArrayBuffer(window.downloadCsvBlob);
               })
             );
-
+          
             const buffer = Buffer.from(csvBuffer);
             const outPath = `ocr_csv/${pdfName.replace(/\.pdf$/i, ".csv")}`;
             fs.writeFileSync(outPath, buffer);
             console.log("✅ CSV généré:", outPath);
-
+          
             await browser.close();
           }
-
+          
           const pdfName = process.argv[2];
           if (!pdfName) {
             console.error("Usage: node ocr.js <file.pdf>");
@@ -68,6 +71,7 @@ jobs:
             console.error("Erreur OCR:", err);
             process.exit(1);
           });
+
           EOF
 
       - name: OCRiser PDFs
