@@ -1,0 +1,9 @@
+{
+  "name": "secretaires",
+  "version": "1.0.0",
+  "description": "OCR automatisé des PDF",
+  "private": true,
+  "dependencies": {
+    "puppeteer": "^21.3.8"
+  }
+}
