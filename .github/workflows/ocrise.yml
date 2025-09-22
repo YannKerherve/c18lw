@@ -43,23 +43,26 @@ jobs:
             console.log("Ouverture:", url);
             await page.goto(url);
           
-            // Récupérer le nombre total de pages du PDF
-            const totalPages = await page.evaluate(() => {
-              return (window.pdfDoc ? window.pdfDoc.numPages : 0);
-            });
+            // Attendre que le PDF soit chargé (window.pdfDoc défini)
+            await page.waitForFunction(() => window.pdfDoc && window.pdfDoc.numPages > 0, { timeout: 0 });
+          
+            const totalPages = await page.evaluate(() => window.pdfDoc.numPages);
             console.log(`📄 PDF détecté avec ${totalPages} pages`);
           
-            // Attendre que le CSV soit prêt en OCRisant toutes les pages
+            // OCRiser toutes les pages une par une
             for (let i = 1; i <= totalPages; i++) {
               console.log(`➡️ OCR page ${i}/${totalPages}...`);
               await page.evaluate((num) => renderAndOcr(num, true), i);
             }
           
-            // Attendre la disponibilité du CSV final
+            // Générer le CSV
             console.log("⏳ Génération du CSV...");
             await page.evaluate(() => downloadCsv());
+          
+            // Attendre que window.downloadCsvBlob apparaisse
             await page.waitForFunction(() => window.downloadCsvBlob !== undefined, { timeout: 0 });
           
+            // Récupérer le blob et l'écrire en fichier
             const csvBuffer = await page.evaluate(() =>
               new Promise(res => {
                 const reader = new FileReader();
