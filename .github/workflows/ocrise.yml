@@ -64,7 +64,7 @@ jobs:
 
                 await browser.close();
               })();
-EOF
+            EOF
           done
 
       - name: Commit CSV results
