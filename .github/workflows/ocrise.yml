@@ -1,140 +1,39 @@
-name: OCRiser PDF
+name: OCR PDF -> CSV
 
 on:
   workflow_dispatch:
     inputs:
-      pdf_files:
-        description: "Liste des PDFs à OCRiser (séparés par des virgules)"
+      pdf_url:
+        description: "URL du PDF à traiter"
         required: true
-        default: "1.pdf,2.pdf"
+        default: "https://yannkerherve.github.io/secretaires/1.pdf"
 
 jobs:
-  ocr:
+  ocr_job:
     runs-on: ubuntu-latest
-    timeout-minutes: 720   # jusqu'à 12h (OCR long)
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "20"
 
       - name: Install dependencies
-        run: npm install puppeteer
+        run: npm ci
 
-      - name: Create OCR script
+      - name: Create output directory
+        run: mkdir -p ocr_csv
+
+      - name: Run OCR
         run: |
-          cat > ocr.js <<'EOF'
-          const puppeteer = require("puppeteer");
-          const fs = require("fs");
-          
-          console.log = (msg = "") => process.stdout.write(msg + "\n");
-          
-          async function run(pdfName) {
-            const url = `file://${process.cwd()}/ocristeur.htm?pdf=${pdfName}`;
-            const browser = await puppeteer.launch({
-              headless: "new",
-              args: ["--no-sandbox", "--disable-setuid-sandbox"],
-              protocolTimeout: 0 // désactive le timeout interne
-            });
-            const page = await browser.newPage();
-            page.setDefaultNavigationTimeout(0);
-          
-            console.log(`Traitement de ${pdfName}...`);
-            console.log("🌐 Ouverture:", url);
-            await page.goto(url);
-          
-            // Attendre qu’un canvas soit rendu (preuve que le PDF est chargé)
-            await page.waitForSelector("canvas", { timeout: 0 });
-          
-            // Récupérer le nombre de pages via le DOM ou une variable globale si dispo
-            const totalPages = await waitForPdfLoaded(page);
-            async function waitForPdfLoaded(page) {
-              const maxRetries = 600; // max 10 minutes si interval 1s
-              const interval = 1000; // 1 seconde
-            
-              for (let i = 0; i < maxRetries; i++) {
-                const numPages = await page.evaluate(() => {
-                  return window.pdfDoc ? window.pdfDoc.numPages : 0;
-                });
-            
-                if (numPages > 0) {
-                  console.log(`✅ PDF chargé avec ${numPages} pages`);
-                  return numPages;
-                }
-            
-                console.log("⏳ PDF pas encore prêt, attente 1s...");
-                await new Promise(r => setTimeout(r, interval));
-              }
-            
-              throw new Error("Timeout : PDF non chargé après plusieurs minutes.");
-            }
+          set -o pipefail
+          node ocr.js "${{ github.event.inputs.pdf_url }}" | tee /dev/stdout
 
-          
-            console.log(`📄 PDF détecté avec ${totalPages} pages`);
-          
-            // OCR page par page
-            for (let i = 1; i <= totalPages; i++) {
-              console.log(`➡️ OCR page ${i}/${totalPages}...`);
-              await page.evaluate((num) => renderAndOcr(num, true), i);
-            }
-          
-            console.log("⏳ Génération du CSV...");
-            await page.evaluate(() => downloadCsv());
-          
-            // Attendre que le blob apparaisse
-            await page.waitForFunction(() => window.downloadCsvBlob !== undefined, {
-              timeout: 0,
-            });
-          
-            const csvBuffer = await page.evaluate(() =>
-              new Promise((res) => {
-                const reader = new FileReader();
-                reader.onload = () => res(Array.from(new Uint8Array(reader.result)));
-                reader.readAsArrayBuffer(window.downloadCsvBlob);
-              })
-            );
-          
-            const buffer = Buffer.from(csvBuffer);
-            const outPath = `ocr_csv/${pdfName.replace(/\.pdf$/i, ".csv")}`;
-            fs.writeFileSync(outPath, buffer);
-            console.log("✅ CSV généré:", outPath);
-          
-            await browser.close();
-          }
-          
-          const pdfName = process.argv[2];
-          if (!pdfName) {
-            console.error("❌ Usage: node ocr.js <file.pdf>");
-            process.exit(1);
-          }
-          
-          run(pdfName).catch((err) => {
-            console.error("❌ Erreur OCR:", err);
-            process.exit(1);
-          });
-
-
-          EOF
-
-      - name: OCRiser PDFs
-        run: |
-          mkdir -p ocr_csv
-          IFS=',' read -ra FILES <<< "${{ github.event.inputs.pdf_files }}"
-          for f in "${FILES[@]}"; do
-            echo "Traitement de $f..."
-            node ocr.js "$f"
-          done
-
-      - name: Commit CSV results
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-          git add ocr_csv/*.csv
-          git commit -m "Ajout des CSV OCRisés" || echo "Rien à commit"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload result CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: csv-output
+          path: ocr_csv/*.csv
