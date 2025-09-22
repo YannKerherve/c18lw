@@ -51,13 +51,28 @@ jobs:
             await page.waitForSelector("canvas", { timeout: 0 });
           
             // Récupérer le nombre de pages via le DOM ou une variable globale si dispo
-            const totalPages = await page.evaluate(() => {
-              if (window.pdfDoc && window.pdfDoc.numPages) {
-                return window.pdfDoc.numPages;
+            const totalPages = await waitForPdfLoaded(page);
+            async function waitForPdfLoaded(page) {
+              const maxRetries = 600; // max 10 minutes si interval 1s
+              const interval = 1000; // 1 seconde
+            
+              for (let i = 0; i < maxRetries; i++) {
+                const numPages = await page.evaluate(() => {
+                  return window.pdfDoc ? window.pdfDoc.numPages : 0;
+                });
+            
+                if (numPages > 0) {
+                  console.log(`✅ PDF chargé avec ${numPages} pages`);
+                  return numPages;
+                }
+            
+                console.log("⏳ PDF pas encore prêt, attente 1s...");
+                await new Promise(r => setTimeout(r, interval));
               }
-              const el = document.querySelector("#totalPages");
-              return el ? parseInt(el.textContent) : 0;
-            });
+            
+              throw new Error("Timeout : PDF non chargé après plusieurs minutes.");
+            }
+
           
             console.log(`📄 PDF détecté avec ${totalPages} pages`);
           
