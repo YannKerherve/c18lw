@@ -31,40 +31,52 @@ jobs:
           const puppeteer = require("puppeteer");
           const fs = require("fs");
           
+          console.log = (msg = "") => process.stdout.write(msg + "\n");
+          
           async function run(pdfName) {
             const url = `file://${process.cwd()}/ocristeur.htm?pdf=${pdfName}`;
             const browser = await puppeteer.launch({
               headless: "new",
-              args: ["--no-sandbox", "--disable-setuid-sandbox"]
+              args: ["--no-sandbox", "--disable-setuid-sandbox"],
+              protocolTimeout: 0 // désactive le timeout interne
             });
             const page = await browser.newPage();
             page.setDefaultNavigationTimeout(0);
           
-            console.log("Ouverture:", url);
+            console.log(`Traitement de ${pdfName}...`);
+            console.log("🌐 Ouverture:", url);
             await page.goto(url);
           
-            // Attendre que le PDF soit chargé (window.pdfDoc défini)
-            await page.waitForFunction(() => window.pdfDoc && window.pdfDoc.numPages > 0, { timeout: 0 });
+            // Attendre qu’un canvas soit rendu (preuve que le PDF est chargé)
+            await page.waitForSelector("canvas", { timeout: 0 });
           
-            const totalPages = await page.evaluate(() => window.pdfDoc.numPages);
+            // Récupérer le nombre de pages via le DOM ou une variable globale si dispo
+            const totalPages = await page.evaluate(() => {
+              if (window.pdfDoc && window.pdfDoc.numPages) {
+                return window.pdfDoc.numPages;
+              }
+              const el = document.querySelector("#totalPages");
+              return el ? parseInt(el.textContent) : 0;
+            });
+          
             console.log(`📄 PDF détecté avec ${totalPages} pages`);
           
-            // OCRiser toutes les pages une par une
+            // OCR page par page
             for (let i = 1; i <= totalPages; i++) {
               console.log(`➡️ OCR page ${i}/${totalPages}...`);
               await page.evaluate((num) => renderAndOcr(num, true), i);
             }
           
-            // Générer le CSV
             console.log("⏳ Génération du CSV...");
             await page.evaluate(() => downloadCsv());
           
-            // Attendre que window.downloadCsvBlob apparaisse
-            await page.waitForFunction(() => window.downloadCsvBlob !== undefined, { timeout: 0 });
+            // Attendre que le blob apparaisse
+            await page.waitForFunction(() => window.downloadCsvBlob !== undefined, {
+              timeout: 0,
+            });
           
-            // Récupérer le blob et l'écrire en fichier
             const csvBuffer = await page.evaluate(() =>
-              new Promise(res => {
+              new Promise((res) => {
                 const reader = new FileReader();
                 reader.onload = () => res(Array.from(new Uint8Array(reader.result)));
                 reader.readAsArrayBuffer(window.downloadCsvBlob);
@@ -81,13 +93,15 @@ jobs:
           
           const pdfName = process.argv[2];
           if (!pdfName) {
-            console.error("Usage: node ocr.js <file.pdf>");
+            console.error("❌ Usage: node ocr.js <file.pdf>");
             process.exit(1);
           }
-          run(pdfName).catch(err => {
-            console.error("Erreur OCR:", err);
+          
+          run(pdfName).catch((err) => {
+            console.error("❌ Erreur OCR:", err);
             process.exit(1);
           });
+
 
           EOF
 
