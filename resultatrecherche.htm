@@ -224,6 +224,7 @@
                 <label for="tolerance">Error tolerance:</label>
                 <input type="range" id="tolerance" name="tolerance" min="0" max="100" value="0">
                 <span id="tolerance-value">0%</span>
+                <button id="search-button">Search</button>
             </div>
         </div>
 
@@ -347,11 +348,20 @@
         }
 
         // Événements
-        searchInput.addEventListener('input', performSearch);
         toleranceSlider.addEventListener('input', () => {
             toleranceValueSpan.textContent = `${toleranceSlider.value}%`;
-            performSearch();
         });
+        
+        // Bouton recherche
+        searchButton.addEventListener('click', performSearch);
+        
+        // Appuyer sur Entrée déclenche la recherche
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
 
         // Chargement du fichier CSV au démarrage
         fetch('data.csv')
@@ -401,6 +411,7 @@
 </body>
 
 </html>
+
 
 
 
