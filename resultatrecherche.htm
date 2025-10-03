@@ -318,7 +318,7 @@
                 const title = row[1];
                 for (let i = 2; i < row.length; i++) {
                     const content = row[i];
-                    let resultPage = `the page ${i - 1}`;
+                    let resultPage = ` page ${i - 1}`;
                     const combinedContent = (i < row.length - 1) ? content + ' ' + row[i + 1] : content;
 
                     if (fuzzySearch(query, content, tolerance)) {
@@ -412,6 +412,7 @@
 </body>
 
 </html>
+
 
 
 
