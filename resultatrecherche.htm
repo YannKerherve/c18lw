@@ -286,7 +286,7 @@
             ${metadataHtml}
             <div class="result-page">
                 Found on ${result.page}.
-                <a href="ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.page.split(' ')[2]}&query=${encodeURIComponent(searchInput.value.trim())}&fuzz=${(100-toleranceSlider.value)/100}" target="_blank">Consult this manual</a>
+                <a href="ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.page.split(' ')[2]}&query=${encodeURIComponent(searchInput.value.trim())}&fuzz=0.75" target="_blank">Consult this manual</a>
 
             </div>
         `;
@@ -413,6 +413,7 @@
 </body>
 
 </html>
+
 
 
 
