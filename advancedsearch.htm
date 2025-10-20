@@ -244,78 +244,72 @@
 
         // Fonction de recherche floue (Fuzzy Search)
 // Calcul de la distance de Levenshtein
+// Distance de Levenshtein
 function levenshtein(a, b) {
-    const dp = Array.from({length: a.length + 1}, () => Array(b.length + 1).fill(0));
+    const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
     for (let i = 0; i <= a.length; i++) dp[i][0] = i;
     for (let j = 0; j <= b.length; j++) dp[0][j] = j;
     for (let i = 1; i <= a.length; i++) {
         for (let j = 1; j <= b.length; j++) {
-            if (a[i - 1] === b[j - 1]) dp[i][j] = dp[i - 1][j - 1];
-            else dp[i][j] = 1 + Math.min(dp[i - 1][j - 1], dp[i][j - 1], dp[i - 1][j]);
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+            dp[i][j] = Math.min(
+                dp[i - 1][j] + 1,
+                dp[i][j - 1] + 1,
+                dp[i - 1][j - 1] + cost
+            );
         }
     }
     return dp[a.length][b.length];
 }
 
-// Vérifie si deux mots sont proches selon la tolérance
 function fuzzyWordMatch(qWord, cWord, tolerance) {
-    return levenshtein(qWord, cWord) <= tolerance;
+    const maxDist = Math.ceil(qWord.length * (tolerance / 100) * 0.4) + 1; // tolérance réelle réduite
+    return levenshtein(qWord, cWord) <= maxDist;
 }
 
-// Niveau intermédiaire : mots proches dans un groupe consécutif
-function intermediatePhraseMatch(queryWords, contentWords, tolerance, groupTolerance) {
-    const groupSize = Math.ceil(queryWords.length * (1 + groupTolerance / 100)); // curseur %
-    for (let i = 0; i <= contentWords.length - 1; i++) {
-        const group = contentWords.slice(i, i + groupSize);
-        let foundWords = 0;
-        queryWords.forEach(qWord => {
-            if (group.some(cWord => fuzzyWordMatch(qWord, cWord, tolerance))) {
-                foundWords++;
-            }
-        });
-        if (foundWords / queryWords.length >= groupTolerance / 100) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// Fuzzy search avec 4 niveaux
+// Fonction principale : retourne un score (0–100)
 function fuzzySearch(query, content, tolerance) {
-    if (!query) return false;
+    if (!query || !content) return 0;
 
-    const lowerQuery = query.toLowerCase();
-    const lowerContent = content.toLowerCase();
-    const queryWords = lowerQuery.split(/\s+/).filter(w => w.length > 2);
-    const contentWords = lowerContent.split(/\s+/);
+    const q = query.toLowerCase().trim();
+    const text = content.toLowerCase();
+    const queryWords = q.split(/\s+/).filter(w => w.length > 2);
+    const contentWords = text.split(/\s+/);
 
     // 1️⃣ Phrase exacte
-    if (lowerContent.includes(lowerQuery)) return true;
+    if (text.includes(q)) return 100;
 
     // 2️⃣ Phrase approximative (ordre respecté)
     for (let i = 0; i <= contentWords.length - queryWords.length; i++) {
-        let allMatch = true;
+        let matchCount = 0;
         for (let j = 0; j < queryWords.length; j++) {
-            if (!fuzzyWordMatch(queryWords[j], contentWords[i + j], tolerance)) {
-                allMatch = false;
-                break;
-            }
+            if (fuzzyWordMatch(queryWords[j], contentWords[i + j], tolerance))
+                matchCount++;
         }
-        if (allMatch) return true;
+        const percent = (matchCount / queryWords.length) * 100;
+        if (percent > 90 - tolerance / 2) return percent;
     }
 
     // 2.5️⃣ Niveau intermédiaire : mots dans un groupe consécutif
-    if (intermediatePhraseMatch(queryWords, contentWords, tolerance, tolerance)) return true;
+    const groupSize = Math.ceil(queryWords.length * (1 + tolerance / 100));
+    for (let i = 0; i < contentWords.length - groupSize; i++) {
+        const group = contentWords.slice(i, i + groupSize);
+        let found = 0;
+        queryWords.forEach(qw => {
+            if (group.some(cw => fuzzyWordMatch(qw, cw, tolerance))) found++;
+        });
+        const score = (found / queryWords.length) * 100;
+        if (score > 80 - tolerance / 2) return score;
+    }
 
-    // 3️⃣ Mot par mot dispersé
+    // 3️⃣ Mots dispersés
     let foundWords = 0;
-    queryWords.forEach(qWord => {
-        if (contentWords.some(cWord => fuzzyWordMatch(qWord, cWord, tolerance))) {
-            foundWords++;
-        }
+    queryWords.forEach(qw => {
+        if (contentWords.some(cw => fuzzyWordMatch(qw, cw, tolerance))) foundWords++;
     });
-    const matchPercentage = (foundWords / queryWords.length) * 100;
-    return matchPercentage >= (100 - tolerance);
+    const looseScore = (foundWords / queryWords.length) * 100;
+
+    return looseScore >= 70 ? looseScore : 0;
 }
 
         // Fonction de rendu des résultats
