@@ -1,5 +1,7 @@
 
 
+
+
 <!-- Created: 26/08/2025 by Yann Kerhervé -->
 <!DOCTYPE html>
 <html lang="en">
@@ -449,6 +451,112 @@ async function runOcr(force=false){
     text=await applyAiCorrection(text);
     pageCache.set(key,text);
     ocrText.textContent=text||'(no text detected)';
+const query = params.get('query');
+const fuzz = parseFloat(params.get('fuzz') || '0.8'); // 0.8 = 80% de similarité minimale
+
+if (query) {
+  const text = ocrText.textContent;
+
+  // Fonction de similarité simple (basée sur Levenshtein)
+  function similarity(a, b) {
+    const dp = Array(a.length + 1).fill(null).map(() => Array(b.length + 1).fill(0));
+    for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+    for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        dp[i][j] = Math.min(
+          dp[i - 1][j] + 1,
+          dp[i][j - 1] + 1,
+          dp[i - 1][j - 1] + cost
+        );
+      }
+    }
+    const dist = dp[a.length][b.length];
+    return 1 - dist / Math.max(a.length, b.length);
+  }
+
+  let best = { score: 0, start: -1, end: -1 };
+  const len = query.length;
+  for (let i = 0; i < text.length - len; i++) {
+    const sub = text.slice(i, i + len + 10); // marge pour variations
+    const s = similarity(query.toLowerCase(), sub.toLowerCase());
+    if (s > best.score) best = { score: s, start: i, end: i + len };
+  }
+
+  if (best.score >= fuzz) {
+    const mid = best.start + 10 + Math.floor((best.end - best.start - len) / 2);
+    const before = text.slice(0, mid);
+    const match = text.slice(mid, mid + len);
+    const after = text.slice(mid + len);
+
+
+
+    ocrText.innerHTML = `${before}<mark style="background:yellow;">${match}</mark>${after}`;
+    statusEl.textContent += ` | Highlighted (similarity ${(best.score*100).toFixed(1)}%)`;
+  } else {
+    statusEl.textContent += ` | No match above ${(fuzz*100).toFixed(0)}% similarity`;
+  }
+}
+
+if (query && data.words && data.words.length > 0) {
+  const ctx = pdfCanvas.getContext('2d');
+  ctx.save();
+
+  // Style visible
+  ctx.fillStyle = 'rgba(255, 255, 0, 0.45)';
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+  ctx.lineWidth = 2;
+
+  // Fonction de similarité simple
+  function similarity(a, b) {
+    const len = Math.max(a.length, b.length);
+    let same = 0;
+    for (let i = 0; i < Math.min(a.length, b.length); i++)
+      if (a[i].toLowerCase() === b[i].toLowerCase()) same++;
+    return same / len;
+  }
+
+  // Split query en mots
+  const queryWords = query.trim().split(/\s+/);
+  const n = queryWords.length;
+
+  let best = { words: null, score: 0 };
+  for (let i = 0; i <= data.words.length - n; i++) {
+    const seq = data.words.slice(i, i + n);
+    const seqText = seq.map(w => w.text).join(' ');
+    const s = similarity(query, seqText);
+    if (s > best.score) best = { words: seq, score: s };
+  }
+
+  if (best.words && best.score >= fuzz) {
+    // Rectangle englobant tous les mots de la séquence
+    const x0 = Math.min(...best.words.map(w => w.bbox.x0));
+    const y0 = Math.min(...best.words.map(w => w.bbox.y0));
+    const x1 = Math.max(...best.words.map(w => w.bbox.x1));
+    const y1 = Math.max(...best.words.map(w => w.bbox.y1));
+
+    const x = x0;
+    const w = x1 - x0;
+    const h = y1 - y0;
+    const y = y0; // inversion Y
+
+    ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
+    ctx.strokeRect(x - 2, y - 2, w + 4, h + 4);
+
+    statusEl.textContent += ` | PDF highlight (score ${(best.score * 100).toFixed(1)}%)`;
+  } else {
+    statusEl.textContent += ` | No PDF match above ${(fuzz * 100).toFixed(0)}%`;
+  }
+
+  ctx.restore();
+}
+
+
+
+
+
+
     statusEl.textContent='OCR over.';
   }catch(e){ statusEl.textContent='OCR error : '+e.message; }
 }
