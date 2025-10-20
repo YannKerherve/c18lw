@@ -1,0 +1,489 @@
+
+
+
+<!-- Created: 26/08/2025 by Yann Kerhervé -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C18LW - Advanced Search</title>
+    <link rel="icon" type="image/png" href="facion.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+
+
+
+    /* Bouton flottant */
+    .menu-wrapper {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
+    }
+
+    .menu-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      color: black; /* texte noir */
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 60px;
+    }
+
+    .menu-button:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .menu-button img {
+      margin-bottom: 0.25rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .menu-button span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: black; /* bien noir */
+    }
+
+    /* Menu déroulant */
+    .menu-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      margin-top: 0.5rem;
+    }
+
+    .menu-panel.open {
+      max-height: 500px;
+    }
+
+    .menu-section {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-section a {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      color: black; /* texte noir */
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .menu-section a:hover {
+      background: #e5e7eb; /* gris clair */
+      color: black; /* reste noir */
+    }
+
+
+
+
+
+
+
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #444;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-controls input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .tolerance-slider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tolerance-slider label {
+            font-weight: bold;
+        }
+
+        #tolerance {
+            width: 150px;
+        }
+
+        #results-container {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        .result-page {
+            margin-top: 5px;
+            color: #555;
+        }
+
+        .result-page a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .result-page a:hover {
+            text-decoration: underline;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #777;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            .search-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Bouton flottant -->
+  <div class="menu-wrapper">
+    <div id="menuToggle" class="menu-button">
+      <img src="c18lw.png" alt="Logo">
+      <span>Menu</span>
+    </div>
+
+    <!-- Contenu du menu -->
+    <div id="menuContent" class="menu-panel">
+      <!-- Bloc 1 -->
+      <div class="menu-section">
+        <a href="index.htm">Home</a>
+        <a href="database.htm">Data Base</a>
+        <a href="resultatrecherche.htm">Advanced Search</a>
+      </div>
+      <!-- Bloc 2 -->
+    </div>
+  </div>
+
+
+
+
+    <div class="container">
+        <h1>Advanced Search in Manuals</h1>
+        <div class="search-controls">
+            <input type="text" id="search-input" placeholder="Enter your keywords...">
+            <div class="tolerance-slider">
+                <label for="tolerance">Error tolerance:</label>
+                <input type="range" id="tolerance" name="tolerance" min="0" max="100" value="0">
+                <span id="tolerance-value">0%</span>
+                <button id="search-button">Search</button>
+            </div>
+        </div>
+
+        <div id="results-container">
+            </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('search-input');
+        const toleranceSlider = document.getElementById('tolerance');
+        const toleranceValueSpan = document.getElementById('tolerance-value');
+        const resultsContainer = document.getElementById('results-container');
+        const searchButton = document.getElementById('search-button');
+        let data = []; // Déclare la variable pour stocker les données du CSV
+
+        // Fonction de recherche floue (Fuzzy Search)
+// Calcul de la distance de Levenshtein
+function levenshtein(a, b) {
+    const dp = Array.from({length: a.length + 1}, () => Array(b.length + 1).fill(0));
+    for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+    for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            if (a[i - 1] === b[j - 1]) dp[i][j] = dp[i - 1][j - 1];
+            else dp[i][j] = 1 + Math.min(dp[i - 1][j - 1], dp[i][j - 1], dp[i - 1][j]);
+        }
+    }
+    return dp[a.length][b.length];
+}
+
+// Vérifie si deux mots sont proches selon la tolérance
+function fuzzyWordMatch(qWord, cWord, tolerance) {
+    return levenshtein(qWord, cWord) <= tolerance;
+}
+
+// Niveau intermédiaire : mots proches dans un groupe consécutif
+function intermediatePhraseMatch(queryWords, contentWords, tolerance, groupTolerance) {
+    const groupSize = Math.ceil(queryWords.length * (1 + groupTolerance / 100)); // curseur %
+    for (let i = 0; i <= contentWords.length - 1; i++) {
+        const group = contentWords.slice(i, i + groupSize);
+        let foundWords = 0;
+        queryWords.forEach(qWord => {
+            if (group.some(cWord => fuzzyWordMatch(qWord, cWord, tolerance))) {
+                foundWords++;
+            }
+        });
+        if (foundWords / queryWords.length >= groupTolerance / 100) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Fuzzy search avec 4 niveaux
+function fuzzySearch(query, content, tolerance) {
+    if (!query) return false;
+
+    const lowerQuery = query.toLowerCase();
+    const lowerContent = content.toLowerCase();
+    const queryWords = lowerQuery.split(/\s+/).filter(w => w.length > 2);
+    const contentWords = lowerContent.split(/\s+/);
+
+    // 1️⃣ Phrase exacte
+    if (lowerContent.includes(lowerQuery)) return true;
+
+    // 2️⃣ Phrase approximative (ordre respecté)
+    for (let i = 0; i <= contentWords.length - queryWords.length; i++) {
+        let allMatch = true;
+        for (let j = 0; j < queryWords.length; j++) {
+            if (!fuzzyWordMatch(queryWords[j], contentWords[i + j], tolerance)) {
+                allMatch = false;
+                break;
+            }
+        }
+        if (allMatch) return true;
+    }
+
+    // 2.5️⃣ Niveau intermédiaire : mots dans un groupe consécutif
+    if (intermediatePhraseMatch(queryWords, contentWords, tolerance, tolerance)) return true;
+
+    // 3️⃣ Mot par mot dispersé
+    let foundWords = 0;
+    queryWords.forEach(qWord => {
+        if (contentWords.some(cWord => fuzzyWordMatch(qWord, cWord, tolerance))) {
+            foundWords++;
+        }
+    });
+    const matchPercentage = (foundWords / queryWords.length) * 100;
+    return matchPercentage >= (100 - tolerance);
+}
+
+        // Fonction de rendu des résultats
+    function renderResults(results) {
+    resultsContainer.innerHTML = '';
+    if (results.length === 0) {
+        resultsContainer.innerHTML = '<p class="no-results">No results found for this search.</p>';
+        return;
+    }
+
+    results.forEach(result => {
+        const item = document.createElement('div');
+        item.className = 'result-item';
+
+        let metadataHtml = '';
+        if(result.author || result.date || result.edition || result.country) {
+            metadataHtml = `<div class="result-metadata">
+                ${result.author ? `<strong>Author:</strong> ${result.author}<br>` : ''}
+                ${result.date ? `<strong>Date:</strong> ${result.date}<br>` : ''}
+                ${result.edition ? `<strong>Edition:</strong> ${result.edition}<br>` : ''}
+                ${result.country ? `<strong>Country:</strong> ${result.country}` : ''}
+            </div>`;
+        }
+
+        item.innerHTML = `
+            <div class="result-title">${result.title}</div>
+            ${metadataHtml}
+            <div class="result-page">
+                Found on ${result.page}.
+                <a href="ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.page.split(' ')[2]}&query=${encodeURIComponent(searchInput.value.trim())}&fuzz=0.75" target="_blank">Consult this manual</a>
+
+            </div>
+        `;
+
+        resultsContainer.appendChild(item);
+    });
+}
+
+        // Fonction de traitement du CSV
+        function parseCSV(csvString) {
+            const lines = csvString.trim().split('\n');
+            return lines.map(line => {
+                const columns = line.split('/newpage/');
+                return columns.map(col => col.replace(/"/g, '').trim());
+            });
+        }
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+            const tolerance = parseInt(toleranceSlider.value, 10);
+            const searchResults = new Set();
+
+            if (query.length === 0) {
+                renderResults([]);
+                return;
+            }
+
+            data.forEach(row => {
+                const filename = row[0];
+                const title = row[1];
+                for (let i = 2; i < row.length; i++) {
+                    const content = row[i];
+                    let resultPage = ` page ${i - 1}`;
+                    const combinedContent = (i < row.length - 1) ? content + ' ' + row[i + 1] : content;
+
+                    if (fuzzySearch(query, content, tolerance)) {
+                        searchResults.add(JSON.stringify({ filename, title, page: resultPage }));
+                    }
+
+                    if (fuzzySearch(query, combinedContent, tolerance) && i < row.length - 1) {
+                        resultPage = ` pages ${i - 1} and ${i}`;
+                        searchResults.add(JSON.stringify({ filename, title, page: resultPage }));
+                    }
+                }
+            });
+
+            const finalResults = Array.from(searchResults).map(item => {
+                const obj = JSON.parse(item);
+                // Cherche les métadonnées correspondantes
+                const meta = metadataList.find(m => m.filename === obj.filename.split(';')[0]);
+                if(meta){
+                    obj.author = meta.author || '';
+                    obj.date = meta.date || '';
+                    obj.edition = meta.edition || '';
+                    obj.country = meta.pays || '';
+                }
+                return obj;
+            });
+
+            renderResults(finalResults);
+        }
+
+        // Événements
+        toleranceSlider.addEventListener('input', () => {
+            toleranceValueSpan.textContent = `${toleranceSlider.value}%`;
+        });
+        
+        // Bouton recherche
+        searchButton.addEventListener('click', performSearch);
+        
+        // Appuyer sur Entrée déclenche la recherche
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+
+        // Chargement du fichier CSV au démarrage
+        fetch('data.csv')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('The data.csv file could not be loaded.');
+                }
+                return response.text();
+            })
+            .then(csvText => {
+                data = parseCSV(csvText); // Stocke les données dans la variable `data`
+                performSearch(); // Exécute la recherche initiale une fois les données chargées
+            })
+            .catch(error => {
+                console.error(error);
+                resultsContainer.innerHTML = `<p class="no-results">Data loading error: ${error.message}</p>`;
+            });
+
+            let metadataList = [];
+
+            fetch('sec.txt')
+                .then(r => r.text())
+                .then(text => {
+                    let pythonLike = text.trim();
+                    if(!pythonLike.startsWith('[')) pythonLike = '[' + pythonLike + ']';
+                    metadataList = eval(pythonLike);
+                })
+                .catch(e => console.warn("Erreur chargement metadata:", e));
+
+
+
+
+
+    });
+</script>
+
+  <script>
+    const toggleBtn = document.getElementById('menuToggle');
+    const menu = document.getElementById('menuContent');
+
+    toggleBtn.addEventListener('click', () => {
+      menu.classList.toggle('open');
+    });
+  </script>
+
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
