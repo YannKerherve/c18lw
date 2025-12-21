@@ -227,6 +227,11 @@
                 <button id="search-button">Search</button>
             </div>
         </div>
+<div id="loading" style="display:none; text-align:center; margin-top:20px;">
+    <img src="loading.gif" alt="Loading..." width="3000">
+</div>
+
+<div id="results-container"></div>
 
         <div id="results-container">
             </div>
@@ -235,6 +240,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const searchInput = document.getElementById('search-input');
+        const loading = document.getElementById('loading');
         const toleranceSlider = document.getElementById('tolerance');
         const toleranceValueSpan = document.getElementById('tolerance-value');
         const resultsContainer = document.getElementById('results-container');
@@ -261,6 +267,7 @@
 
         // Fonction de rendu des résultats
     function renderResults(results) {
+    loading.style.display = 'none';
     resultsContainer.innerHTML = '';
     if (results.length === 0) {
         resultsContainer.innerHTML = '<p class="no-results">No results found for this search.</p>';
@@ -305,6 +312,8 @@
         }
 
         function performSearch() {
+            loading.style.display = 'block';
+            resultsContainer.innerHTML = '';
             const query = searchInput.value.trim();
             const tolerance = parseInt(toleranceSlider.value, 10);
             const searchResults = new Set();
@@ -413,6 +422,7 @@
 </body>
 
 </html>
+
 
 
 
