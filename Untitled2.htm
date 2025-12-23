@@ -245,34 +245,43 @@
         const toleranceValueSpan = document.getElementById('tolerance-value');
         const resultsContainer = document.getElementById('results-container');
         const searchButton = document.getElementById('search-button');
-
-        let data = [];
+        
+        let data = []; 
         let metadataList = [];
 
-        // Fonction de recherche floue (Fuzzy Search)
         function fuzzySearch(query, content, tolerance) {
-            if (!query) return false;
+            if (!query || !content) return false;
+
             const queryWords = query.toLowerCase().split(/\s+/).filter(word => word.length > 2);
+            if (queryWords.length === 0) return false;
+
             const contentWords = content.toLowerCase().split(/\s+/);
+            
+            // Fenêtre = 5 fois la longueur de la recherche
+            const windowSize = queryWords.length * 5; 
+            const requiredCount = Math.ceil(queryWords.length * (100 - tolerance) / 100);
 
-            let foundWords = 0;
-            queryWords.forEach(qWord => {
-                if (contentWords.some(cWord => cWord.includes(qWord))) {
-                    foundWords++;
-                }
-            });
+            for (let i = 0; i <= contentWords.length - windowSize; i++) {
+                const window = contentWords.slice(i, i + windowSize);
+                let foundInWindow = 0;
 
-            const matchPercentage = (foundWords / queryWords.length) * 100;
-            return matchPercentage >= (100 - tolerance);
+                queryWords.forEach(qWord => {
+                    if (window.some(cWord => cWord.includes(qWord))) {
+                        foundInWindow++;
+                    }
+                });
+
+                if (foundInWindow >= requiredCount) return true;
+            }
+            return false;
         }
 
-        // Fonction de rendu des résultats
         function renderResults(results) {
             loading.style.display = 'none';
             resultsContainer.innerHTML = '';
-
+            
             if (results.length === 0) {
-                resultsContainer.innerHTML = '<p class="no-results">No results found for this search.</p>';
+                resultsContainer.innerHTML = '<p class="no-results">No results found.</p>';
                 return;
             }
 
@@ -290,12 +299,15 @@
                     </div>`;
                 }
 
+                // L'URL ne prend que le numéro de la première page (result.pageIndex)
+                const url = `ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.pageIndex}&query=${encodeURIComponent(searchInput.value.trim())}&fuzz=0.75`;
+
                 item.innerHTML = `
                     <div class="result-title">${result.title}</div>
                     ${metadataHtml}
                     <div class="result-page">
-                        Found on ${result.page}.
-                        <a href="ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.page.split(' ')[2]}&query=${encodeURIComponent(searchInput.value.trim())}&fuzz=0.75" target="_blank">Consult this manual</a>
+                        Found on ${result.pageLabel}.
+                        <a href="${url}" target="_blank">Consult this manual</a>
                     </div>
                 `;
                 resultsContainer.appendChild(item);
@@ -323,24 +335,32 @@
             }
 
             setTimeout(() => {
-                const searchResults = new Set();
+                const searchResultsSet = new Set();
 
                 data.forEach(row => {
                     const filename = row[0];
                     const title = row[1];
-                    // On commence à l'index 2 (le contenu des pages)
-                    for (let i = 2; i < row.length; i++) {
-                        const content = row[i];
-                        let resultPage = ` page ${i - 1}`;
 
-                        // RECHERCHE UNIQUEMENT SUR LA PAGE COURANTE
-                        if (fuzzySearch(query, content, tolerance)) {
-                            searchResults.add(JSON.stringify({ filename, title, page: resultPage }));
+                    for (let i = 2; i < row.length; i++) {
+                        const currentPageContent = row[i];
+                        const nextPageContent = row[i + 1] || "";
+                        
+                        // On crée un bloc qui fusionne la page actuelle et la suivante pour le fuzzy
+                        const combinedContent = currentPageContent + " " + nextPageContent;
+                        
+                        if (fuzzySearch(query, combinedContent, tolerance)) {
+                            // On enregistre le résultat lié à la page actuelle (i-1)
+                            searchResultsSet.add(JSON.stringify({ 
+                                filename, 
+                                title, 
+                                pageIndex: i - 1, // Pour l'URL
+                                pageLabel: `page ${i - 1}` // Pour l'affichage
+                            }));
                         }
                     }
                 });
 
-                const finalResults = Array.from(searchResults).map(item => {
+                const finalResults = Array.from(searchResultsSet).map(item => {
                     const obj = JSON.parse(item);
                     const meta = metadataList.find(m => m.filename === obj.filename.split(';')[0]);
                     if(meta){
@@ -353,7 +373,7 @@
                 });
 
                 renderResults(finalResults);
-            }, 50);
+            }, 50); 
         }
 
         toleranceSlider.addEventListener('input', () => {
@@ -369,7 +389,7 @@
             .then(response => response.text())
             .then(csvText => {
                 data = parseCSV(csvText);
-                performSearch();
+                performSearch(); 
             })
             .catch(error => {
                 resultsContainer.innerHTML = `<p class="no-results">Error: ${error.message}</p>`;
@@ -396,6 +416,7 @@
 </body>
 
 </html>
+
 
 
 
