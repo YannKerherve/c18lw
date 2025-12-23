@@ -1,5 +1,4 @@
 <!-- Created: 22/10/2025 by Yann Kerhervé -->
-<!-- C:\Users\yaker\Pictures\2025 - 7 Autriche-suisse best of -->
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -156,78 +155,92 @@
   </footer>
 
   <!-- JS -->
-  <script>
-    // Génération aléatoire des images et légendes pour demo
-    const n = 409;
-    const phrases = [
-      "Workshop on epistolary manuscripts",
-      "Archives consultation at Brest Library",
-      "Digital humanities project demonstration",
-      "Team research session at HCTI Lab",
-      "Eighteenth-century letter manual example",
-      "Manuscript restoration project",
-      "Exhibition: Letters through the Centuries",
-      "Historical document study",
-      "Student project showcase",
-      "Conference on letter-writing"
-    ];
-
+<script>
     const gallery = document.getElementById('gallery');
-    const images = [];
-    for(let i=1; i<=n; i++){
-      const caption = phrases[Math.floor(Math.random()*phrases.length)] + ` – Image ${i}`;
-      const filename = `images/image (${i}).jpg`; // à adapter
-      images.push({filename, caption});
-
-      const div = document.createElement('div');
-      div.className='masonry-item';
-      div.innerHTML = `<img src="${filename}" alt="${caption}" loading="lazy"><div class="caption-overlay">${caption}</div>`;
-      div.addEventListener('click',()=>openLightbox(i-1));
-      gallery.appendChild(div);
-    }
-
-    // Lightbox
-    let currentIndex = 0;
     const lightbox = document.getElementById('lightbox');
     const lbImage = lightbox.querySelector('img');
     const lbCaption = lightbox.querySelector('.caption');
+    
+    let images = [];
+    let currentIndex = 0;
+    const baseURL = "https://yannkerherve.github.io/secretairedb/pictures/";
 
-    // ouverture lightbox
-    function openLightbox(index){
+    // 1. Charger les données du fichier CSV
+    fetch('imagedata.csv')
+      .then(response => response.text())
+      .then(csvText => {
+        const lines = csvText.trim().split('\n');
+        
+        // On commence à i=1 pour ignorer l'en-tête (filename,caption,date)
+        for (let i = 1; i < lines.length; i++) {
+          const row = lines[i].split(',');
+          if (row.length >= 2) {
+            const filename = row[0].trim();
+            const caption = row[1].trim();
+            const date = row[2] ? row[2].trim() : "";
+            
+            // On crée un texte complet pour la légende (Ex: "Scougal (1714)")
+            const fullCaption = date ? `${caption} (${date})` : caption;
+            const imagePath = baseURL + filename;
+
+            images.push({ filename: imagePath, caption: fullCaption });
+
+            // 2. Créer l'élément dans la galerie
+            const div = document.createElement('div');
+            div.className = 'masonry-item';
+            div.innerHTML = `
+              <img src="${imagePath}" alt="${fullCaption}" loading="lazy">
+              <div class="caption-overlay">${fullCaption}</div>
+            `;
+            
+            // On capture l'index actuel dans le tableau pour la lightbox
+            const itemIndex = images.length - 1;
+            div.addEventListener('click', () => openLightbox(itemIndex));
+            gallery.appendChild(div);
+          }
+        }
+      })
+      .catch(error => console.error("Erreur lors du chargement du CSV :", error));
+
+    // --- Fonctions Lightbox ---
+
+    function openLightbox(index) {
       currentIndex = index;
-      lbImage.style.opacity = 0;  // image transparente
+      lbImage.style.opacity = 0;
       lbImage.src = images[index].filename;
       lbCaption.textContent = images[index].caption;
       lightbox.style.display = 'flex';
-      setTimeout(()=>{ lbImage.style.opacity = 1; },50); // fade-in
+      setTimeout(() => { lbImage.style.opacity = 1; }, 50);
     }
 
-    // changer image avec fondue
-    function changeImage(newIndex){
-      lbImage.style.opacity = 0; // fade-out
+    function changeImage(newIndex) {
+      lbImage.style.opacity = 0;
       currentIndex = (newIndex + images.length) % images.length;
-      setTimeout(()=>{
+      setTimeout(() => {
         lbImage.src = images[currentIndex].filename;
         lbCaption.textContent = images[currentIndex].caption;
-        lbImage.style.opacity = 1; // fade-in
-      }, 300); // correspond au fade-out
+        lbImage.style.opacity = 1;
+      }, 300);
     }
 
-    // gestion des clics
-    lightbox.querySelector('.close').addEventListener('click',()=>lightbox.style.display='none');
-    lightbox.querySelector('.prev').addEventListener('click',()=>changeImage(currentIndex-1));
-    lightbox.querySelector('.next').addEventListener('click',()=>changeImage(currentIndex+1));
+    // --- Gestion des événements ---
 
-    // navigation clavier
-    document.addEventListener('keydown', e=>{
-      if(lightbox.style.display==='flex'){
-        if(e.key==='ArrowLeft') changeImage(currentIndex-1);
-        if(e.key==='ArrowRight') changeImage(currentIndex+1);
-        if(e.key==='Escape') lightbox.style.display='none';
+    lightbox.querySelector('.close').addEventListener('click', () => lightbox.style.display = 'none');
+    lightbox.querySelector('.prev').addEventListener('click', () => changeImage(currentIndex - 1));
+    lightbox.querySelector('.next').addEventListener('click', () => changeImage(currentIndex + 1));
+
+    document.addEventListener('keydown', e => {
+      if (lightbox.style.display === 'flex') {
+        if (e.key === 'ArrowLeft') changeImage(currentIndex - 1);
+        if (e.key === 'ArrowRight') changeImage(currentIndex + 1);
+        if (e.key === 'Escape') lightbox.style.display = 'none';
       }
     });
 
-
+    // Fermer en cliquant à côté de l'image
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) lightbox.style.display = 'none';
+    });
   </script>
 </body>
 </html>
