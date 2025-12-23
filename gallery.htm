@@ -166,42 +166,61 @@
     const baseURL = "https://yannkerherve.github.io/secretairedb/pictures/";
 
     // 1. Charger les données du fichier CSV
-    fetch('imagedata.csv')
-      .then(response => response.text())
-      .then(csvText => {
-        const lines = csvText.trim().split('\n');
+fetch('imagedata.csv')
+  .then(response => response.text())
+  .then(csvText => {
+    const lines = csvText.trim().split('\n');
+    let tempImages = [];
+
+    // 1. Extraction des données
+    for (let i = 1; i < lines.length; i++) {
+      const row = lines[i].split(',');
+      if (row.length >= 2) {
+        const filename = row[0].trim();
+        const caption = row[1].trim();
+        const rawDate = row[2] ? row[2].trim() : "";
         
-        // On commence à i=1 pour ignorer l'en-tête (filename,caption,date)
-        for (let i = 1; i < lines.length; i++) {
-          const row = lines[i].split(',');
-          if (row.length >= 2) {
-            const filename = row[0].trim();
-            const caption = row[1].trim();
-            const date = row[2] ? row[2].trim() : "";
-            
-            // On crée un texte complet pour la légende (Ex: "Scougal (1714)")
-            const fullCaption = date ? `${caption} (${date})` : caption;
-            const imagePath = baseURL + filename;
+        // On traite la date pour le tri : on prend la première si c'est un intervalle (ex: 1714-1718)
+        let firstDate = rawDate.split('-')[0].trim();
+        // On convertit en nombre pour le tri (si "?" ou vide, on met une valeur spéciale -1)
+        let sortValue = (firstDate === "?" || firstDate === "") ? -1 : parseInt(firstDate);
 
-            images.push({ filename: imagePath, caption: fullCaption });
+        tempImages.push({ 
+          filename: baseURL + filename, 
+          caption: rawDate ? `🖼️ ${caption} (${rawDate})` : caption,
+          dateValue: sortValue 
+        });
+      }
+    }
 
-            // 2. Créer l'élément dans la galerie
-            const div = document.createElement('div');
-            div.className = 'masonry-item';
-            div.innerHTML = `
-              <img src="${imagePath}" alt="${fullCaption}" loading="lazy">
-              <div class="caption-overlay">${fullCaption}</div>
-            `;
-            
-            // On capture l'index actuel dans le tableau pour la lightbox
-            const itemIndex = images.length - 1;
-            div.addEventListener('click', () => openLightbox(itemIndex));
-            gallery.appendChild(div);
-          }
-        }
-      })
-      .catch(error => console.error("Erreur lors du chargement du CSV :", error));
+    // 2. Tri des images
+    // -1 (les "?") passent en premier, puis ordre croissant des années
+    tempImages.sort((a, b) => a.dateValue - b.dateValue);
 
+    // 3. Création de la galerie avec les images triées
+    tempImages.forEach((imgData, index) => {
+      images.push(imgData); // Ajout au tableau global pour la lightbox
+
+      const div = document.createElement('div');
+      div.className = 'masonry-item';
+      div.innerHTML = `
+        <img src="${imgData.filename}" alt="${imgData.caption}" loading="lazy">
+        <div class="caption-overlay">${imgData.caption}</div>
+      `;
+      div.addEventListener('click', () => openLightbox(index));
+      gallery.appendChild(div);
+    });
+  })
+  .catch(error => console.error("Erreur lors du chargement ou du tri :", error));
+
+
+
+
+
+
+
+
+  
     // --- Fonctions Lightbox ---
 
     function openLightbox(index) {
