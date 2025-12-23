@@ -1,360 +1,415 @@
+
+
+
 <!-- Created: 26/08/2025 by Yann Kerhervé -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Secretaires</title>
-  <style>
-    :root {
-      --bg: #0b1c48;
-      --panel: #0f255f;
-      --muted: #dbe4ff;
-      --accent: #74c0fc;
-      --radius: 16px;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C18LW - Advanced Search</title>
+    <link rel="icon" type="image/png" href="facion.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+
+
+
+    /* Bouton flottant */
+    .menu-wrapper {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
     }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg); color: white; }
-    header { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.1); display: flex; align-items: center; gap: 12px; }
-    header h1 { font-size: 18px; margin: 0; font-weight: 600; }
 
-    .controls { display: flex; gap: 12px; flex-wrap: wrap; padding: 12px 20px; align-items: center; }
-    .controls .group { background: var(--panel); padding: 10px 12px; border-radius: var(--radius); display: flex; align-items: center; gap: 8px; }
-    label { font-size: 14px; opacity: .9; }
-    input[type="number"], select { border-radius: 10px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: white; padding: 6px 8px; min-width: 72px; }
-    input[type="range"] { accent-color: var(--accent); }
-    button { background: var(--accent); color: #00243f; border: none; padding: 8px 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
-    button:disabled { opacity: .6; cursor: not-allowed; }
-
-    .split { display: grid; grid-template-columns: 40% 60%; gap: 12px; padding: 12px 20px 24px; height: calc(100vh - 180px); }
-    .panel { background: var(--panel); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
-
-    .panel h3 { margin: 0; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 14px; letter-spacing: .3px; color: var(--muted); }
-    .panel .body { padding: 10px; overflow: auto; flex: 1; }
-
-    #ocrText { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 14px; line-height: 1.4; }
-    #status { font-size: 12px; opacity: .8; padding: 8px 12px; border-top: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.15); }
-
-    #pdfCanvas { width: 100%; height: auto; display: block; background: #111827; }
-
-    .footer { padding: 8px 20px 20px; color: #c7d2fe; font-size: 12px; opacity: .85; }
-
-    @media (max-width: 980px) {
-      .split { grid-template-columns: 1fr; height: auto; }
+    .menu-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      color: black; /* texte noir */
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 60px;
     }
-  </style>
+
+    .menu-button:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .menu-button img {
+      margin-bottom: 0.25rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .menu-button span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: black; /* bien noir */
+    }
+
+    /* Menu déroulant */
+    .menu-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      margin-top: 0.5rem;
+    }
+
+    .menu-panel.open {
+      max-height: 500px;
+    }
+
+    .menu-section {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-section a {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      color: black; /* texte noir */
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .menu-section a:hover {
+      background: #e5e7eb; /* gris clair */
+      color: black; /* reste noir */
+    }
+
+
+
+
+
+
+
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #444;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-controls input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .tolerance-slider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tolerance-slider label {
+            font-weight: bold;
+        }
+
+        #tolerance {
+            width: 150px;
+        }
+
+        #results-container {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        .result-page {
+            margin-top: 5px;
+            color: #555;
+        }
+
+        .result-page a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .result-page a:hover {
+            text-decoration: underline;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #777;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            .search-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>Secretaires</h1>
-  </header>
 
-  <div class="controls">
-    <div class="group">
-      <label for="pdfFile">Importer PDF image</label>
-      <input type="file" id="pdfFile" accept="application/pdf" />
-      <label for="database">ou choisir parmis la base de donnée :</label>
-      <select id="database" name="database">
-  <option value="1">1</option>
-  <option value="2">2</option>
-  <option value="3">3</option>
-  <option value="4">4</option>
-</select>
+  <!-- Bouton flottant -->
+  <div class="menu-wrapper">
+    <div id="menuToggle" class="menu-button">
+      <img src="c18lw.png" alt="Logo">
+      <span>Menu</span>
     </div>
 
-    <div class="group">
-      <label for="pageNumber">Page</label>
-      <input type="number" id="pageNumber" min="1" value="1" />
-      <span>/ <span id="pageCount">0</span></span>
-      <input type="range" id="pageSlider" min="1" value="1" step="1" style="width: 200px;" />
+    <!-- Contenu du menu -->
+    <div id="menuContent" class="menu-panel">
+      <!-- Bloc 1 -->
+      <div class="menu-section">
+        <a href="index.htm">Home</a>
+        <a href="database.htm">Data Base</a>
+        <a href="resultatrecherche.htm">Advanced Search</a>
+      </div>
+      <!-- Bloc 2 -->
     </div>
+  </div>
 
-    <div class="group">
-      <label for="lang">Langue OCR</label>
-      <select id="lang">
-        <option value="fra" >Français (fra)</option>
-        <option value="eng" selected>English (eng)</option>
-      </select>
-    </div>
 
-    <div class="group">
-      <label for="zoom">Zoom rendu</label>
-      <input type="range" id="zoom" min="1" max="3" step="0.25" value="2" />
-      <span id="zoomVal">2.00×</span>
-    </div>
 
-    <div class="group">
-      <label><input type="checkbox" id="applyCustomChars" checked /> Appliquer dictionnaire de correction caractères</label>
-      <label><input type="checkbox" id="applySpellCheck" checked /> Correction orthographique</label>
-<div>
-  <input type="checkbox" id="applySpellCheck">
-  <label for="applySpellCheck">Correction orthographique</label>
 
-  <label for="spellLang">Langue :</label>
-  <select id="spellLang">
-    <option value="fr">Français</option>
-    <option value="eng">English</option>
-  </select>
+    <div class="container">
+        <h1>Advanced Search in Manuals</h1>
+        <div class="search-controls">
+            <input type="text" id="search-input" placeholder="Enter your keywords...">
+            <div class="tolerance-slider">
+                <label for="tolerance">Error tolerance:</label>
+                <input type="range" id="tolerance" name="tolerance" min="0" max="100" value="0">
+                <span id="tolerance-value">0%</span>
+                <button id="search-button">Search</button>
+            </div>
+        </div>
+<div id="loading" style="display:none; text-align:center; margin-top:20px;">
+    <img src="loading.gif" alt="Loading..." width="3000">
 </div>
 
+<div id="results-container"></div>
 
+    <!---    <div id="results-container">
+            </div>---->
     </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('search-input');
+        const loading = document.getElementById('loading');
+        const toleranceSlider = document.getElementById('tolerance');
+        const toleranceValueSpan = document.getElementById('tolerance-value');
+        const resultsContainer = document.getElementById('results-container');
+        const searchButton = document.getElementById('search-button');
 
-    <div class="group">
-      <button id="rerunOcr" disabled>Relancer l'OCR</button>
-    </div>
-  </div>
+        let data = [];
+        let metadataList = [];
 
-  <div class="split">
-      <section class="panel">
-      <h3>Prévisualisation PDF</h3>
-      <div class="body">
-        <canvas id="pdfCanvas"></canvas>
-      </div>
-    </section>
-    <section class="panel">
-      <h3>Transcription OCR (page courante)</h3>
-      <div class="body" id="ocrText"></div>
-      <div id="status">Ouvrez un PDF image pour commencer.</div>
-    </section>
+        // Fonction de recherche floue (Fuzzy Search)
+        function fuzzySearch(query, content, tolerance) {
+            if (!query) return false;
+            const queryWords = query.toLowerCase().split(/\s+/).filter(word => word.length > 2);
+            const contentWords = content.toLowerCase().split(/\s+/);
 
+            let foundWords = 0;
+            queryWords.forEach(qWord => {
+                if (contentWords.some(cWord => cWord.includes(qWord))) {
+                    foundWords++;
+                }
+            });
 
-  </div>
+            const matchPercentage = (foundWords / queryWords.length) * 100;
+            return matchPercentage >= (100 - tolerance);
+        }
 
-  <div class="footer">
-    Astuces :
-    • Pour de meilleurs résultats, augmentez le zoom rendu (2× à 3×).
-    • La première reconnaissance télécharge les données de langue depuis le CDN (connexion requise).
-    • <a href=contact.html>contact</a>
-  </div>
+        // Fonction de rendu des résultats
+        function renderResults(results) {
+            loading.style.display = 'none';
+            resultsContainer.innerHTML = '';
 
-  <!-- PDF.js version 2.16 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
-  </script>
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<p class="no-results">No results found for this search.</p>';
+                return;
+            }
 
-  <!-- Tesseract.js -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
 
-  <!-- Typo.js (correction orthographique) -->
-  <script src="https://cdn.jsdelivr.net/npm/typo-js@1.2.1/typo.min.js"></script>
-  <script>
-const spellLang = document.getElementById("spellLang");
-console.log("Langue choisie :", spellLang.value);
-</script>
-  <script>
-    let pdfDoc = null;
-    let currentPage = 1;
-    let scale = 2.0;
-    let pageCount = 0;
-    const pageCache = new Map();
+                let metadataHtml = '';
+                if(result.author || result.date || result.edition || result.country) {
+                    metadataHtml = `<div class="result-metadata">
+                        ${result.author ? `<strong>Author:</strong> ${result.author}<br>` : ''}
+                        ${result.date ? `<strong>Date:</strong> ${result.date}<br>` : ''}
+                        ${result.edition ? `<strong>Edition:</strong> ${result.edition}<br>` : ''}
+                        ${result.country ? `<strong>Country:</strong> ${result.country}` : ''}
+                    </div>`;
+                }
 
-    // Dictionnaire de correction caractères personnalisés
-    const customChars = {
-      '∫': 's',
-      'ſ': 's',
-      'ﬃ': 'ffi'
-    };
+                item.innerHTML = `
+                    <div class="result-title">${result.title}</div>
+                    ${metadataHtml}
+                    <div class="result-page">
+                        Found on ${result.page}.
+                        <a href="ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.page.split(' ')[2]}&query=${encodeURIComponent(searchInput.value.trim())}&fuzz=0.75" target="_blank">Consult this manual</a>
+                    </div>
+                `;
+                resultsContainer.appendChild(item);
+            });
+        }
 
-    const $ = (sel) => document.querySelector(sel);
+        function parseCSV(csvString) {
+            const lines = csvString.trim().split('\n');
+            return lines.map(line => {
+                const columns = line.split('/newpage/');
+                return columns.map(col => col.replace(/"/g, '').trim());
+            });
+        }
 
-    const fileInput = $('#pdfFile');
-    const pageNumber = $('#pageNumber');
-    const pageSlider = $('#pageSlider');
-    const pageCountEl = $('#pageCount');
-    const pdfCanvas = $('#pdfCanvas');
-    const ocrText = $('#ocrText');
-    const statusEl = $('#status');
-    const langSel = $('#lang');
-    const zoom = $('#zoom');
-    const zoomVal = $('#zoomVal');
-    const rerunBtn = $('#rerunOcr');
-    const applyCustomChars = $('#applyCustomChars');
-    const applySpellCheck = $('#applySpellCheck');
+        function performSearch() {
+            loading.style.display = 'block';
+            resultsContainer.innerHTML = '';
 
-// dictionnaires Typo.js
-let dictionary_fr = null;
-let dictionary_en = null;
+            const query = searchInput.value.trim();
+            const tolerance = parseInt(toleranceSlider.value, 10);
 
-// Charge .aff et .dic pour français (fr_FR)
-Promise.all([
-  fetch('https://cdn.jsdelivr.net/npm/typo-js@1.2.1/typo/dictionaries/fr_FR/fr_FR.aff').then(r => r.text()),
-  fetch('https://cdn.jsdelivr.net/npm/typo-js@1.2.1/typo/dictionaries/fr_FR/fr_FR.dic').then(r => r.text())
-]).then(([aff, dic]) => {
-  try {
-    dictionary_fr = new Typo('fr_FR', aff, dic);
-    console.log('dictionary_fr loaded');
-  } catch (e) {
-    console.warn('Erreur chargement dictionary_fr', e);
-  }
-}).catch(e => console.warn('Erreur fetch fr dictionary', e));
+            if (query.length === 0) {
+                renderResults([]);
+                return;
+            }
 
-// Charge .aff et .dic pour anglais (en_US)
-Promise.all([
-  fetch('https://cdn.jsdelivr.net/npm/typo-js@1.2.1/typo/dictionaries/en_US/en_US.aff').then(r => r.text()),
-  fetch('https://cdn.jsdelivr.net/npm/typo-js@1.2.1/typo/dictionaries/en_US/en_US.dic').then(r => r.text())
-]).then(([aff, dic]) => {
-  try {
-    dictionary_en = new Typo('en_US', aff, dic);
-    console.log('dictionary_en loaded');
-  } catch (e) {
-    console.warn('Erreur chargement dictionary_en', e);
-  }
-}).catch(e => console.warn('Erreur fetch en dictionary', e));
+            setTimeout(() => {
+                const searchResults = new Set();
 
+                data.forEach(row => {
+                    const filename = row[0];
+                    const title = row[1];
+                    // On commence à l'index 2 (le contenu des pages)
+                    for (let i = 2; i < row.length; i++) {
+                        const content = row[i];
+                        let resultPage = ` page ${i - 1}`;
 
-    fileInput.addEventListener('change', openPdf);
-    pageNumber.addEventListener('change', onPageNumberChange);
-    pageSlider.addEventListener('input', onPageSliderChange);
-    langSel.addEventListener('change', () => runOcr(true));
-    zoom.addEventListener('input', () => {
-      scale = parseFloat(zoom.value);
-      zoomVal.textContent = scale.toFixed(2) + '×';
-      if (pdfDoc) renderAndOcr(currentPage, false);
+                        // RECHERCHE UNIQUEMENT SUR LA PAGE COURANTE
+                        if (fuzzySearch(query, content, tolerance)) {
+                            searchResults.add(JSON.stringify({ filename, title, page: resultPage }));
+                        }
+                    }
+                });
+
+                const finalResults = Array.from(searchResults).map(item => {
+                    const obj = JSON.parse(item);
+                    const meta = metadataList.find(m => m.filename === obj.filename.split(';')[0]);
+                    if(meta){
+                        obj.author = meta.author || '';
+                        obj.date = meta.date || '';
+                        obj.edition = meta.edition || '';
+                        obj.country = meta.pays || '';
+                    }
+                    return obj;
+                });
+
+                renderResults(finalResults);
+            }, 50);
+        }
+
+        toleranceSlider.addEventListener('input', () => {
+            toleranceValueSpan.textContent = `${toleranceSlider.value}%`;
+        });
+
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        fetch('data.csv')
+            .then(response => response.text())
+            .then(csvText => {
+                data = parseCSV(csvText);
+                performSearch();
+            })
+            .catch(error => {
+                resultsContainer.innerHTML = `<p class="no-results">Error: ${error.message}</p>`;
+            });
+
+        fetch('sec.txt')
+            .then(r => r.text())
+            .then(text => {
+                let pythonLike = text.trim();
+                if(!pythonLike.startsWith('[')) pythonLike = '[' + pythonLike + ']';
+                metadataList = eval(pythonLike);
+            })
+            .catch(e => console.warn("Metadata error:", e));
     });
-    rerunBtn.addEventListener('click', () => runOcr(true));
 
-    async function openPdf() {
-      resetUI();
-      const file = fileInput.files && fileInput.files[0];
-      if (!file) return;
-      const buf = await file.arrayBuffer();
-      const task = pdfjsLib.getDocument({ data: buf });
-      statusEl.textContent = 'Chargement du PDF…';
-      try {
-        pdfDoc = await task.promise;
-        pageCount = pdfDoc.numPages;
-        pageCountEl.textContent = pageCount;
-        pageNumber.value = 1;
-        pageSlider.max = pageCount;
-        pageSlider.value = 1;
-        rerunBtn.disabled = false;
-        statusEl.textContent = `PDF chargé (${pageCount} page${pageCount>1?'s':''}). Rendu + OCR en cours…`;
-        await renderAndOcr(1, true);
-      } catch (e) {
-        statusEl.textContent = 'Erreur de chargement du PDF : ' + e.message;
-      }
-    }
-
-    async function renderPage(num) {
-      const page = await pdfDoc.getPage(num);
-      const viewport = page.getViewport({ scale });
-      const ctx = pdfCanvas.getContext('2d');
-      pdfCanvas.width = Math.floor(viewport.width);
-      pdfCanvas.height = Math.floor(viewport.height);
-      await page.render({ canvasContext: ctx, viewport }).promise;
-    }
-
-    function cacheKey(num = currentPage) {
-      return `${num}-${langSel.value}-${scale.toFixed(2)}`;
-    }
-
-function applyCustomCorrections(text) {
-  if (!document.getElementById("applySpellCheck").checked) return text;
-
-  const spellLang = document.getElementById("spellLang");
-  let dict = (spellLang.value === "eng") ? dictionary_en : dictionary_fr;
-
-  if (!dict) {
-    console.warn("Aucun dictionnaire chargé pour la langue :", spellLang.value);
-    return text;
-  }
-
-  text = text.split(/(\s+)/).map(token => {
-    if (typeof token !== "string") return token; // sécurité
-    if (/^\s+$/.test(token)) return token; // espaces seuls
-
-    const match = token.match(/^([^A-Za-zÀ-ÖØ-öø-ÿ'-]*)([A-Za-zÀ-ÖØ-öø-ÿ'-]+)([^A-Za-zÀ-ÖØ-öø-ÿ'-]*)$/);
-    if (!match) return token;
-
-    const prefix = match[1] || '';
-    const core   = match[2] || '';
-    const suffix = match[3] || '';
-
-    // 🛡 sécurité maximale avant dict.check()
-    if (!core || typeof core !== "string") return token;
-    if (core.length < 2) return token; // trop court pour corriger
-    if (!/^[A-Za-zÀ-ÖØ-öø-ÿ'-]+$/.test(core)) return token; // caractères chelous
-
-    try {
-      if (dict.check(core)) return token; // mot correct
-      const suggestions = dict.suggest(core);
-      if (Array.isArray(suggestions) && suggestions.length > 0) {
-        return prefix + suggestions[0] + suffix;
-      }
-    } catch (e) {
-      console.warn("Erreur correction orthographique sur:", core, e);
-    }
-
-    return token; // mot inchangé si problème
-  }).join('');
-
-  return text;
-}
+    const toggleBtn = document.getElementById('menuToggle');
+    const menu = document.getElementById('menuContent');
+    toggleBtn.addEventListener('click', () => {
+        menu.classList.toggle('open');
+    });
+</script>
 
 
-
-
-    async function runOcr(force = false) {
-      const key = cacheKey();
-      if (!force && pageCache.has(key)) {
-        ocrText.textContent = pageCache.get(key);
-        statusEl.textContent = 'Affiché depuis le cache.';
-        return;
-      }
-      statusEl.textContent = 'OCR en cours…';
-      try {
-        const { data } = await Tesseract.recognize(
-          pdfCanvas,
-          langSel.value,
-          { logger: (m) => { if (m.status) statusEl.textContent = `${m.status} ${m.progress ? Math.round(m.progress*100)+'%' : ''}`; } }
-        );
-        let text = (data && data.text ? data.text : '').trim();
-        text = applyCustomCorrections(text);
-        pageCache.set(key, text);
-        ocrText.textContent = text || '(aucun texte détecté)';
-        statusEl.textContent = 'OCR terminé.';
-      } catch (e) {
-        statusEl.textContent = 'Erreur OCR : ' + e.message;
-      }
-    }
-
-    async function renderAndOcr(num, forceOcr = false) {
-      currentPage = num;
-      await renderPage(num);
-      await runOcr(forceOcr);
-    }
-
-    function onPageNumberChange() {
-      let num = parseInt(pageNumber.value, 10) || 1;
-      num = Math.min(Math.max(1, num), pageCount || 1);
-      pageNumber.value = num;
-      pageSlider.value = num;
-      if (pdfDoc) renderAndOcr(num, false);
-    }
-
-    function onPageSliderChange() {
-      const num = parseInt(pageSlider.value, 10) || 1;
-      pageNumber.value = num;
-      if (pdfDoc) renderAndOcr(num, false);
-    }
-
-    function resetUI() {
-      pdfDoc = null;
-      currentPage = 1;
-      pageCount = 0;
-      pageCache.clear();
-      pageNumber.value = 1;
-      pageSlider.value = 1;
-      pageCountEl.textContent = '0';
-      ocrText.textContent = '';
-      statusEl.textContent = 'Ouvrez un PDF image pour commencer.';
-      rerunBtn.disabled = true;
-      const ctx = pdfCanvas.getContext('2d');
-      ctx.clearRect(0, 0, pdfCanvas.width, pdfCanvas.height);
-    }
-  </script>
 </body>
+
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
