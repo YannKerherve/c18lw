@@ -12,11 +12,11 @@ on:
       source_csv:
         description: "CSV contenant le contenu du livre"
         required: true
-        default: "data/livre.csv"
+        default: "?.csv"
       target_csv:
         description: "CSV global à compléter"
         required: true
-        default: "data/global.csv"
+        default: "data.csv"
 
 jobs:
   append:
