@@ -235,9 +235,10 @@ button:hover {
             <input type="text" id="search-input" placeholder="Enter your keywords...">
             <div class="tolerance-slider">
                 <label for="tolerance">Error tolerance:</label>
-                <input type="range" id="tolerance" name="tolerance" min="0" max="100" value="0">
-                <span id="tolerance-value">0%</span>
+                <input type="range" id="tolerance" name="tolerance" min="0" max="100" value="20">
+                <span id="tolerance-value">20%</span>
                 <button id="search-button">Search</button>
+                <span id="search-mode" style="font-size: 0.8em; color: #666; font-style: italic; margin-right: 10px;"></span>
             </div>
         </div>
 <div id="loading" style="display:none; text-align:center; margin-top:20px;">
@@ -345,6 +346,7 @@ button:hover {
             // ANALYSE DE LA LONGUEUR ICI
             const queryWordsList = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
             const isLongQuery = queryWordsList.length > 10;
+            modeSpan.textContent = isLongQuery ? "Model used: Fast" : "Model used: Accurate";
 
             setTimeout(() => {
                 const searchResultsSet = new Set();
@@ -385,7 +387,13 @@ button:hover {
                     if(meta) Object.assign(obj, {author: meta.author, date: meta.date, edition: meta.edition, country: meta.pays});
                     return obj;
                 });
-
+// --- TRI CHRONOLOGIQUE ---
+        finalResults.sort((a, b) => {
+            // On extrait les chiffres de la date (ex: "1850" ou "Paris, 1850")
+            const dateA = parseInt(String(a.date).replace(/\D/g, '')) || 0;
+            const dateB = parseInt(String(b.date).replace(/\D/g, '')) || 0;
+            return dateA - dateB; // Du plus ancien au plus récent
+        });
                 renderResults(finalResults);
             }, 50);
         }
