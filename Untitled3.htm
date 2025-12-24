@@ -1,0 +1,423 @@
+<!-- Created: 26/08/2025 by Yann Kerhervé -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C18LW - Advanced Search</title>
+    <link rel="icon" type="image/png" href="facion.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+
+
+
+    /* Bouton flottant */
+    .menu-wrapper {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
+    }
+
+    .menu-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.9);
+      color: black; /* texte noir */
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 60px;
+    }
+
+    .menu-button:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .menu-button img {
+      margin-bottom: 0.25rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .menu-button span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: black; /* bien noir */
+    }
+
+    /* Menu déroulant */
+    .menu-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      margin-top: 0.5rem;
+    }
+
+    .menu-panel.open {
+      max-height: 500px;
+    }
+
+    .menu-section {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-section a {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      color: black; /* texte noir */
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .menu-section a:hover {
+      background: #e5e7eb; /* gris clair */
+      color: black; /* reste noir */
+    }
+
+
+
+
+
+
+
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #444;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-controls input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .tolerance-slider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tolerance-slider label {
+            font-weight: bold;
+        }
+
+        #tolerance {
+            width: 150px;
+        }
+
+        #results-container {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        .result-page {
+            margin-top: 5px;
+            color: #555;
+        }
+
+        .result-page a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .result-page a:hover {
+            text-decoration: underline;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #777;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            .search-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Bouton flottant -->
+  <div class="menu-wrapper">
+    <div id="menuToggle" class="menu-button">
+      <img src="c18lw.png" alt="Logo">
+      <span>Menu</span>
+    </div>
+
+    <!-- Contenu du menu -->
+    <div id="menuContent" class="menu-panel">
+      <!-- Bloc 1 -->
+      <div class="menu-section">
+        <a href="index.htm">Home</a>
+        <a href="database.htm">Data Base</a>
+        <a href="resultatrecherche.htm">Advanced Search</a>
+      </div>
+      <!-- Bloc 2 -->
+    </div>
+  </div>
+
+
+
+
+    <div class="container">
+        <h1>Advanced Search in Manuals</h1>
+        <div class="search-controls">
+            <input type="text" id="search-input" placeholder="Enter your keywords...">
+            <div class="tolerance-slider">
+                <label for="tolerance">Error tolerance:</label>
+                <input type="range" id="tolerance" name="tolerance" min="0" max="100" value="0">
+                <span id="tolerance-value">0%</span>
+                <button id="search-button">Search</button>
+            </div>
+        </div>
+<div id="loading" style="display:none; text-align:center; margin-top:20px;">
+    <center><img src="loading.gif" alt="Loading..." width="300"></center>
+</div>
+
+<div id="results-container"></div>
+
+    <!---    <div id="results-container">
+            </div>---->
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('search-input');
+        const loading = document.getElementById('loading');
+        const toleranceSlider = document.getElementById('tolerance');
+        const toleranceValueSpan = document.getElementById('tolerance-value');
+        const resultsContainer = document.getElementById('results-container');
+        const searchButton = document.getElementById('search-button');
+
+        let data = [];
+        let metadataList = [];
+
+        // --- ALGO 1 : RECHERCHE COURTE (Précise) ---
+        function fuzzySearch(query, content, tolerance) {
+            if (!query || !content) return false;
+            const queryWords = query.toLowerCase().split(/\s+/).filter(word => word.length > 2);
+            if (queryWords.length === 0) return false;
+
+            const contentWords = content.toLowerCase().split(/\s+/);
+            const windowSize = queryWords.length * 2;
+            const requiredCount = Math.ceil(queryWords.length * (100 - tolerance) / 100);
+
+            for (let i = 0; i <= contentWords.length - windowSize; i++) {
+                const window = contentWords.slice(i, i + windowSize);
+                let foundInWindow = 0;
+                queryWords.forEach(qWord => {
+                    if (window.some(cWord => cWord.includes(qWord))) foundInWindow++;
+                });
+                if (foundInWindow >= requiredCount) return true;
+            }
+            return false;
+        }
+
+        // --- ALGO 2 : RECHERCHE LONGUE (Rapide) ---
+        function fastfuzzySearch(query, content, tolerance) {
+            if (!query || !content) return false;
+
+            const extractWords = (text) => (text.toLowerCase().match(/[a-z0-9àâçéèêëîïôûùüÿñæœ]{3,}/g) || []);
+            const queryWords = extractWords(query);
+            if (queryWords.length === 0) return false;
+
+            const uniqueQueryWords = new Set(queryWords);
+            const contentLower = content.toLowerCase();
+            let foundCount = 0;
+
+            uniqueQueryWords.forEach(qWord => {
+                if (contentLower.includes(qWord)) foundCount++;
+            });
+
+            const actualPercentage = (foundCount / uniqueQueryWords.size) * 100;
+            return actualPercentage >= (100 - tolerance);
+        }
+
+        function renderResults(results) {
+            loading.style.display = 'none';
+            resultsContainer.innerHTML = '';
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<p class="no-results">No results found.</p>';
+                return;
+            }
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                let metadataHtml = '';
+                if(result.author || result.date || result.edition || result.country) {
+                    metadataHtml = `<div class="result-metadata">
+                        ${result.author ? `<strong>Author:</strong> ${result.author}<br>` : ''}
+                        ${result.date ? `<strong>Date:</strong> ${result.date}<br>` : ''}
+                        ${result.edition ? `<strong>Edition:</strong> ${result.edition}<br>` : ''}
+                        ${result.country ? `<strong>Country:</strong> ${result.country}` : ''}
+                    </div>`;
+                }
+                const url = `ocr.htm?pdf=${result.filename.split(';')[0]}&page=${result.pageIndex}&query=${encodeURIComponent(searchInput.value.trim())}&fuzz=0.75`;
+                item.innerHTML = `<div class="result-title">${result.title}</div>${metadataHtml}
+                    <div class="result-page">Found on ${result.pageLabel}. <a href="${url}" target="_blank">Consult this manual</a></div>`;
+                resultsContainer.appendChild(item);
+            });
+        }
+
+        function parseCSV(csvString) {
+            return csvString.trim().split('\n').map(line =>
+                line.split('/newpage/').map(col => col.replace(/"/g, '').trim())
+            );
+        }
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+            if (query.length === 0) { renderResults([]); return; }
+
+            loading.style.display = 'block';
+            resultsContainer.innerHTML = '';
+            const tolerance = parseInt(toleranceSlider.value, 10);
+
+            // ANALYSE DE LA LONGUEUR ICI
+            const queryWordsList = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+            const isLongQuery = queryWordsList.length > 10;
+
+            setTimeout(() => {
+                const searchResultsSet = new Set();
+
+                data.forEach(row => {
+                    const filename = row[0];
+                    const title = row[1];
+                    const searchFunc = isLongQuery ? fastfuzzySearch : fuzzySearch;
+
+                    for (let i = 2; i < row.length; i++) {
+                        const contentCurrent = row[i];
+                        const contentNext = row[i + 1] || "";
+                        const combinedContent = contentCurrent + " " + contentNext;
+
+                        if (searchFunc(query, combinedContent, tolerance)) {
+                            let foundPageIndex = -1;
+
+                            if (searchFunc(query, contentCurrent, tolerance)) {
+                                foundPageIndex = i - 1;
+                            } else if (searchFunc(query, contentNext, tolerance)) {
+                                foundPageIndex = i;
+                                i++;
+                            } else {
+                                foundPageIndex = i - 1;
+                                i++;
+                            }
+
+                            searchResultsSet.add(JSON.stringify({
+                                filename, title, pageIndex: foundPageIndex, pageLabel: `page ${foundPageIndex}`
+                            }));
+                        }
+                    }
+                });
+
+                const finalResults = Array.from(searchResultsSet).map(item => {
+                    const obj = JSON.parse(item);
+                    const meta = metadataList.find(m => m.filename === obj.filename.split(';')[0]);
+                    if(meta) Object.assign(obj, {author: meta.author, date: meta.date, edition: meta.edition, country: meta.pays});
+                    return obj;
+                });
+
+                renderResults(finalResults);
+            }, 50);
+        }
+
+        toleranceSlider.addEventListener('input', () => {
+            toleranceValueSpan.textContent = `${toleranceSlider.value}%`;
+        });
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') performSearch(); });
+
+        fetch('data.csv').then(r => r.text()).then(t => { data = parseCSV(t); }).catch(e => console.error(e));
+        fetch('sec.txt').then(r => r.text()).then(t => {
+            let pl = t.trim();
+            metadataList = eval(pl.startsWith('[') ? pl : '[' + pl + ']');
+        }).catch(e => console.warn(e));
+    });
+
+    const toggleBtn = document.getElementById('menuToggle');
+    const menu = document.getElementById('menuContent');
+    toggleBtn.addEventListener('click', () => { menu.classList.toggle('open'); });
+</script>
+
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
