@@ -1,0 +1,74 @@
+name: Append book to CSV corpus
+
+on:
+  workflow_dispatch:
+    inputs:
+      pdf_name:
+        description: "Nom du PDF (ex: 2.pdf)"
+        required: true
+      book_title:
+        description: "Titre du livre"
+        required: true
+      source_csv:
+        description: "CSV contenant le contenu du livre"
+        required: true
+        default: "data/livre.csv"
+      target_csv:
+        description: "CSV global à compléter"
+        required: true
+        default: "data/global.csv"
+
+jobs:
+  append:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Append book entry
+        run: |
+          python << 'EOF'
+          from pathlib import Path
+
+          pdf_name = "${{ github.event.inputs.pdf_name }}"
+          title = "${{ github.event.inputs.book_title }}"
+          source_csv = Path("${{ github.event.inputs.source_csv }}")
+          target_csv = Path("${{ github.event.inputs.target_csv }}")
+
+          if not source_csv.exists():
+              raise FileNotFoundError(source_csv)
+
+          # Lire le contenu du CSV source
+          content = source_csv.read_text(encoding="utf-8")
+
+          # Nettoyage pour une entrée CSV mono-ligne
+          def sanitize(text):
+              text = text.replace('"', '""')
+              text = text.replace("\n", " ")
+              text = text.replace("\r", " ")
+              return text.strip()
+
+          pdf_name = sanitize(pdf_name)
+          title = sanitize(title)
+          content = sanitize(content)
+
+          entry = f"\"{pdf_name}\"/newpage/\"{title}\"/newpage/\"{content}\"\n"
+
+          target_csv.parent.mkdir(parents=True, exist_ok=True)
+          with target_csv.open("a", encoding="utf-8") as f:
+              f.write(entry)
+
+          print("Entrée ajoutée avec succès.")
+          EOF
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add ${{ github.event.inputs.target_csv }}
+          git commit -m "Add book ${{ github.event.inputs.pdf_name }}"
+          git push
