@@ -371,21 +371,6 @@
 
                 renderResults(finalResults);
             }, 50);
-
-                const finalResults = Array.from(searchResultsSet).map(item => {
-                    const obj = JSON.parse(item);
-                    const meta = metadataList.find(m => m.filename === obj.filename.split(';')[0]);
-                    if(meta){
-                        obj.author = meta.author || '';
-                        obj.date = meta.date || '';
-                        obj.edition = meta.edition || '';
-                        obj.country = meta.pays || '';
-                    }
-                    return obj;
-                });
-
-                renderResults(finalResults);
-            }, 50); 
         }
 
         toleranceSlider.addEventListener('input', () => {
@@ -428,6 +413,7 @@
 </body>
 
 </html>
+
 
 
 
