@@ -330,27 +330,49 @@
                 renderResults([]);
                 return;
             }
-           setTimeout(() => {
+setTimeout(() => {
                 const searchResultsSet = new Set();
 
                 data.forEach(row => {
                     const filename = row[0];
                     const title = row[1];
 
+                    // On parcourt les pages
                     for (let i = 2; i < row.length; i++) {
-                        const currentPageContent = row[i];
-                        const nextPageContent = row[i + 1] || "";
+                        const contentCurrent = row[i];      // Contenu Page N
+                        const contentNext = row[i + 1] || ""; // Contenu Page N+1
 
-                        // On crée un bloc qui fusionne la page actuelle et la suivante pour le fuzzy
-                        const combinedContent = currentPageContent + " " + nextPageContent;
+                        // 1. On teste d'abord la combinaison (pour attraper les mots coupés)
+                        const combinedContent = contentCurrent + " " + contentNext;
 
                         if (fuzzySearch(query, combinedContent, tolerance)) {
-                            // On enregistre le résultat lié à la page actuelle (i-1)
-                            searchResultsSet.add(JSON.stringify({ 
-                                filename, 
-                                title, 
-                                pageIndex: i - 1, // Pour l'URL
-                                pageLabel: `page ${i - 1}` // Pour l'affichage
+                            let foundPageIndex = -1;
+
+                            // LOGIQUE DE DÉDUPLICATION INTELLIGENTE
+
+                            // Cas A : Le mot est-il entier dans la page actuelle ?
+                            if (fuzzySearch(query, contentCurrent, tolerance)) {
+                                foundPageIndex = i - 1;
+                                // On ne saute pas de page, car il pourrait y avoir une AUTRE occurrence page suivante
+                            }
+                            // Cas B : Le mot est-il entier dans la page suivante ?
+                            // (Cela arrive si le mot est au début de la page suivante, mais attrapé par la fenêtre combinée)
+                            else if (fuzzySearch(query, contentNext, tolerance)) {
+                                foundPageIndex = i;
+                                i++; // IMPORTANT : On saute le prochain tour de boucle car on vient de traiter la page suivante
+                            }
+                            // Cas C : Le mot est véritablement coupé entre les deux pages
+                            else {
+                                foundPageIndex = i - 1; // On pointe vers le début du mot
+                                i++; // On saute pour éviter que le morceau restant déclenche un faux positif après
+                            }
+
+                            // On ajoute le résultat validé
+                            searchResultsSet.add(JSON.stringify({
+                                filename,
+                                title,
+                                pageIndex: foundPageIndex,
+                                pageLabel: `page ${foundPageIndex}`
                             }));
                         }
                     }
@@ -371,6 +393,7 @@
 
                 renderResults(finalResults);
             }, 50);
+
         }
 
         toleranceSlider.addEventListener('input', () => {
@@ -413,6 +436,7 @@
 </body>
 
 </html>
+
 
 
 
