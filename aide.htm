@@ -1,120 +1,214 @@
-<!-- Created: 28/08/2025 by Yann Kerhervé -->
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact & Aide</title>
+    <title>Administration - 18th Century Letter-writers</title>
     <link rel="icon" type="image/png" href="facion.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: #fff;
-            padding: 20px 40px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2 {
-            color: #555;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 10px;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            margin-bottom: 10px;
-        }
-        a.button {
-            display: inline-block;
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px 15px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-        a.button:hover {
-            background-color: #0056b3;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #fcfcfc; color: #333333; }
+        .code-block { background-color: #1e1e1e; color: #d4d4d4; padding: 1.5rem; border-radius: 0.75rem; font-family: monospace; font-size: 0.9rem; line-height: 1.5; overflow-x: auto; }
+        .step-number { background-color: #333333; color: #fcfcfc; width: 2.5rem; height: 2.5rem; border-radius: 9999px; display: flex; items-center: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+        .link-alt { color: #2563eb; text-decoration: underline; transition: color 0.2s; }
+        .link-alt:hover { color: #1d4ed8; }
     </style>
 </head>
-<body>
+<body class="bg-[#fcfcfc] text-[#333333]">
 
-    <div class="container">
-        <h1>Contact & Aide</h1>
+    <header class="bg-[#fcfcfc] bg-opacity-90 backdrop-blur-sm sticky top-0 z-40 p-4 border-b border-gray-100">
+        <div class="container mx-auto flex items-center justify-between">
+            <a href="index.htm" class="flex-shrink-0">
+                <img src="c18lw.png" alt="Logo" class="w-12 h-12 rounded-lg">
+            </a>
+            <nav class="hidden md:flex items-center space-x-8 text-lg font-medium">
+                <a href="#gallery" class="hover:text-[#6b7280]">Guide Galerie</a>
+                <a href="#database" class="hover:text-[#6b7280]">Guide Livres</a>
+                <a href="database.htm" class="px-5 py-2 bg-[#333333] text-[#fcfcfc] rounded-full hover:bg-[#6b7280] transition-all">To data base</a>
+            </nav>
+            <img src="hcti.png" alt="Logo HCTI" class="h-12 rounded-lg">
+        </div>
+    </header>
 
-        <section>
-            <!--<h2>Crédits</h2>
-            <ul>
-                <li><strong>Idée / Réalisation :</strong> A. Kerhervé</li>
-                <li><strong>Développement technique :</strong> Y. Kerhervé</li>
-                <li><strong>Contact :</strong>
-                    <a href="mailto:alain.kerherve@univ-brest.fr">A. Kerhervé</a> ; <a href="https://github.com/YannKerherve" target="_blank">Y. Kerhervé</a>
-                    <br>
+    <main class="container mx-auto px-6 py-12 max-w-5xl">
 
-                </li>
-                <li><strong>Laboratoire de recherche :</strong>
-                    <a href="https://www.univ-brest.fr/hcti/fr" target="_blank">HCTI (Héritages et Créations dans le Texte et l'Image)</a>
-                </li>
-            </ul>-->
+        <section id="gallery" class="mb-24">
+            <h2 class="text-4xl font-black mb-10 border-b-4 border-[#333333] pb-4 inline-block">Comment ajouter une image à la page « Gallery » ?</h2>
+
+            <div class="space-y-8">
+                <div class="flex gap-6 items-start">
+                    <div class="step-number">1</div>
+                    <p class="text-xl">Se connecter sur GitHub : <a href="https://github.com/" target="_blank" class="link-alt">https://github.com/</a></p>
+                </div>
+
+                <div class="flex gap-6 items-start">
+                    <div class="step-number">2</div>
+                    <p class="text-xl">Choisir le bon repository (<strong>Secretaires</strong>)</p>
+                </div>
+
+                <div class="flex gap-6 items-start">
+                    <div class="step-number">3</div>
+                    <p class="text-xl">Ouvrir et entrer dans le menu de modification de <strong>imagedata.csv</strong></p>
+                </div>
+
+                <div class="flex gap-6 items-start">
+                    <div class="step-number">4</div>
+                    <div class="w-full">
+                        <p class="text-xl mb-4">Ajouter les informations : <code>Nomdel’image.format, Titredel’image, date-date-date</code></p>
+                        <div class="code-block">
+                            filename,caption,date<br>
+                            image(1).JPG,Scougal,1714<br>
+                            image(2).jpg,elegant epistles,1814…
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-6 items-start">
+                    <div class="step-number">5</div>
+                    <p class="text-xl font-bold">Enregistrer le fichier.</p>
+                </div>
+
+                <div class="flex gap-6 items-start">
+                    <div class="step-number">6</div>
+                    <p class="text-xl">Aller dans le repository <strong>secretairedb</strong> : <a href="https://github.com/YannKerherve/secretairedb" target="_blank" class="link-alt">https://github.com/YannKerherve/secretairedb</a></p>
+                </div>
+
+                <div class="flex gap-6 items-start">
+                    <div class="step-number">7</div>
+                    <p class="text-xl">Entrer dans le dossier <strong>pictures</strong></p>
+                </div>
+
+                <div class="flex gap-6 items-start">
+                    <div class="step-number">8</div>
+                    <p class="text-xl font-bold">Uploader les images / enregistrer.</p>
+                </div>
+
+                <div class="flex gap-6 items-start">
+                    <div class="step-number">9</div>
+                    <div class="bg-blue-50 p-6 rounded-2xl border-l-4 border-blue-500">
+                        <p class="text-lg text-blue-900"><strong>Si l’image est trop lourde :</strong> réduire sa résolution/taille. <br>Toutes les images ne doivent pas forcément être en JPG.</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <hr>
+        <hr class="my-20 border-gray-200">
 
-        <section>
-            <h2>Aide pour les dévellopeurs :</h2>
-            <p><strong>Pour ajouter un ouvrage à la base de données :</strong></p>
-            <ol>
-                <li>
-                    Remplissez le fichier Excel de correspondance (nom / titre / auteur / date / édition / pays) avec le nouvel ouvrage en plus des autres.
-                    <br><a href="secretaires.xlsx" class="button">Télécharger l'Excel</a>
-                </li>
-                <li>
-                    Utilisez le micrologiciel pour transformer le tableau Excel en un format de couple comme ci-dessous :
-                    <pre>
-book = {
-    "title": titre,
-    "author": auteur,
-    "date": str(date),
-    "filename": nom_pdf,
-    "edition": edition,
-    "pays": pays,
-}
-                    </pre>
-                    <a href="listeur_v2.0.exe" class="button">Télécharger le micrologiciel</a>
-                </li>
-                <li>
-                    Copiez la sortie du micrologiciel et remplacez celle existante dans le fichier <code>index.htm</code> sur le serveur du site web. L'information existante se trouve à la ligne 266.
-                    <br><a href="https://drive.google.com/file/d/14-mDZ0Sk-GTKTIxuDYwLWLNuTTZWgQqD/view?usp=sharing" class="button">Se connecter au serveur</a>
-                </li>
-                <li>Faites attention à ne pas avoir de répétition de « [ » ou « ] » au début et à la fin.</li>
-                <li>Enregistrez le fichier <code>index.htm</code>.</li>
-                <li>Ajoutez le nouveau PDF au dossier du serveur en vous assurant qu'il est nommé exactement comme dans le fichier Excel (et sans espaces !).</li>
-                <li>Remplacez le fichier Excel de sauvegarde par votre nouvelle version.</li>
-                <li>
-                    Faites l'OCR du PDF à l'aide de l'ocrisateur.
-                    <br><a href="ocristeur.htm" class="button">Aller à l'ocrisateur</a>
-                </li>
-                <li>Ajoutez le contenu à la base de données CSV sur le serveur (<code>data.csv</code>).</li>
-                <li>Et voilà, c'est fait ! Bravo !</li>
+        <section id="database" class="mb-24">
+            <h2 class="text-4xl font-black mb-10 border-b-4 border-[#333333] pb-4 inline-block">Comment ajouter un livre à la base de données ?</h2>
 
-                *si le pdf est trop gros et n'arrive pas à charger, il faut l'importer en deux parties (utiliser google chrome, imprimer vers pdf, pages 1 à la moitié, enregistrer le premier, puis le deuxième (de la moitié à la fin)). Ensuite aller sur git hub / repository du site web / action / merge pdfs / run workflow (main, nom des deux moitiées, nom final...)
-            </ol>
+            <div class="space-y-10">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                        <span class="step-number mb-4">1-2</span>
+                        <p class="text-lg">Connectez-vous sur GitHub et sélectionnez le repository <strong>Secretaires</strong>.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                        <span class="step-number mb-4">3</span>
+                        <p class="text-lg">Uploader le PDF. Nommage : <code class="bg-gray-100 px-2 py-1 rounded">Numérointerne.version.pdf</code></p>
+                    </div>
+                </div>
+
+                <div class="bg-[#f5f5f5] p-8 rounded-3xl">
+                    <h3 class="text-2xl font-bold mb-6 flex items-center">📦 Gestion des PDF volumineux</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-sm font-bold">a</span>
+                            <p>Utiliser <a href="https://www.ilovepdf.com/fr/compresser_pdf" target="_blank" class="link-alt">iLovePDF</a> pour compresser.</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">b</span>
+                            <div class="text-[#4b5563]">
+                                <p class="mb-3">Si toujours trop lourd :</p>
+                                <ul class="list-disc ml-6 space-y-2">
+                                    <li>Utiliser Chrome et « imprimer en PDF » pour scinder le PDF en deux.</li>
+                                    <li>Uploader les deux (ex: <em>64.11première.pdf</em> et <em>64.11deuxième.pdf</em>).</li>
+                                    <li>Aller dans <strong>« Action »</strong> (barre du haut).</li>
+                                    <li>Cliquer sur <strong>« merge pdf »</strong> (à gauche).</li>
+                                    <li>Cliquer sur <strong>« run workflow »</strong> (à droite).</li>
+                                    <li>Compléter les cases et lancer le workflow.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="flex gap-6 items-start">
+                        <div class="step-number">4-5</div>
+                        <p class="text-lg">Remplir le <a href="https://yannkerherve.github.io/secretaires/secretaires.xlsx" class="link-alt">fichier Excel de correspondance</a> et le mettre à jour sur GitHub.</p>
+                    </div>
+
+                    <div class="flex gap-6 items-start">
+                        <div class="step-number">6</div>
+                        <div class="w-full">
+                            <p class="text-lg mb-4">Utiliser le <strong>micrologiciel</strong> pour transformer le tableau Excel en format de couple :</p>
+                            <a href="https://drive.google.com/file/d/14-mDZ0Sk-GTKTIxuDYwLWLNuTTZWgQqD/view" class="inline-block mb-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Télécharger le micrologiciel</a>
+                            <div class="code-block">
+                                book = {<br>
+                                &nbsp;&nbsp;&nbsp;"title": titre,<br>
+                                &nbsp;&nbsp;&nbsp;"author": auteur,<br>
+                                &nbsp;&nbsp;&nbsp;"date": str(date),<br>
+                                &nbsp;&nbsp;&nbsp;"filename": nom_pdf,<br>
+                                &nbsp;&nbsp;&nbsp;"edition": edition,<br>
+                                &nbsp;&nbsp;&nbsp;"pays": pays,<br>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-6 items-start">
+                        <div class="step-number">7-10</div>
+                        <div class="text-lg">
+                            <p>Copiez la sortie et remplacez celle à la <strong>ligne 440</strong> de <code>database.htm</code>.</p>
+                            <p class="text-red-600 font-bold mt-2 italic">⚠️ Attention à ne pas avoir de répétition de « [ » ou « ] » au début et à la fin.</p>
+                            <p class="mt-2">Faites de même pour <code>sec.txt</code> et enregistrez.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900 text-white p-10 rounded-[3rem] shadow-2xl">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="step-number bg-white text-black">11-12</div>
+                        <h3 class="text-2xl font-bold">Finalisation OCR et Data.csv</h3>
+                    </div>
+
+                    <div class="space-y-6">
+                        <p class="text-xl">1. Faire l'OCR via l'<a href="https://yannkerherve.github.io/secretaires/ocristeur.htm" class="underline decoration-blue-500">ocrisateur</a>.</p>
+                        <p class="text-xl">2. Ajouter le contenu à la base de données CSV (data.csv) :</p>
+
+                        <div class="bg-white/10 p-6 rounded-2xl border border-white/20">
+                            <ul class="space-y-4 text-gray-300">
+                                <li class="flex gap-3"><span class="text-white font-bold">a.</span> <span>Télécharger <strong>data.csv</strong>. <strong class="text-red-400">NE PAS ESSAYER DE L’OUVRIR !!!!</strong> (Risque de bug PC).</span></li>
+                                <li class="flex gap-3"><span class="text-white font-bold">b.</span> <span>Utiliser le deuxième micro-logiciel.</span></li>
+                                <li class="flex gap-3"><span class="text-white font-bold">c.</span> <span>Sélectionner le data.csv téléchargé et le nouveau à ajouter. Faire tourner et enregistrer.</span></li>
+                                <li class="flex gap-3"><span class="text-white font-bold">d.</span> <span>Le fichier est trop lourd pour un copier-coller ou pour l’uploader directement dans GitHub.</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
-    </div>
+    </main>
+
+    <footer class="bg-[#333333] text-[#fcfcfc] py-16">
+        <div class="container mx-auto px-6 text-center md:text-left">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="flex items-center space-x-8">
+                    <img src="c18lwblanc.png" alt="Logo" class="w-20 h-20 rounded-lg">
+                    <img src="hctiblanc.png" alt="Logo HCTI" class="w-12 rounded-lg">
+                </div>
+                <nav class="flex space-x-8 text-lg">
+                    <a href="index.htm" class="hover:text-[#9ca3af]">Accueil</a>
+                    <a href="database.htm" class="hover:text-[#9ca3af]">Base de données</a>
+                </nav>
+            </div>
+            <div class="mt-12 pt-8 border-t border-gray-700 text-sm text-[#9ca3af] text-center">
+                © 2025-2026 A. Kerhervé - HCTI - All rights reserved.
+            </div>
+        </div>
+    </footer>
 
 </body>
 </html>
-
-
-
