@@ -376,6 +376,14 @@
         "pays": null
     },
     {
+        "title": "The New and Complete English Letter-Writer; or, Whole Art of General Correspondence. Consisting of an Universal Series of the Most Important, Instructive, and Interesting Entire New Letters, On Every Occurrence in Life: By Which Any Person Who Can Use the Pen, May Write Letters on Every Subject, with Propriety and Elegance of Stile. In These Models for Inditing Epistles on the Various Occasions of Human Life, Particular Regard Has Been Paid to the Following (among Other) Heads, viz. Trade, Affection, Love, Courtship, Marriage, Friendship, Instruction, History, Commerce, Industry, Prosperity, Prudence, Gratitude, Generolity, Misfortunes, Consolation, Prodigality, Virtue, Vice, Piety, Wit, Mirth, Folly, Pleasure, Humanity, Memory, Morality, Education, Happiness, Business, Sickness, Death, Integrity, Oeconomy. Affluence, Politeness, Fidelity, Riches, Duty and Concerns of Parents, Children, and Other Relations, Masters, Mistresses, Illustrious Persons, Officers, Soldiers, Seamen, Schoolmasters, Scholars; and Other Useful and Entertaining Particulars too Numerous to Mention in this Little Page.",
+        "author": "Brown, George",
+        "date": "1770",
+        "filename": "36.4.pdf",
+        "edition": "?",
+        "pays": null
+    },
+    {
         "title": "The New English Letter-Writer; or, Whole Art of General Correspondence. Consisting of a Series of the most important, instructive, and interesting entire new letters, On Every Occurrence in Life: By which any Person who can use the Pen, may write Letters on every Subject, with Propriety and Elegance of Stile. In these Models for inditing Epistles on the various Occasions of Human Life, particular Regard has been paid to the following Heads, viz. Trade, Affection, Love, Courtship, Marriage, Friendship, Instruction, History, Commerce, Industry, Prosperity, Prudence, Gratitude, Generosity, Misfortunes, Consolation, Prodigality, Virtue, Vice, Piety, Wit, Mirth, Folly, Pleasure, Humanity, Memory, Morality, Education, Happiness, Business, Sickness, Death, Integrity, Oeconomy, Affluence, Politeness, Fidelity, Riches, Duty and Concerns of Parents, Children, and other Relations, Masters, Mistresses, Illustrious Persons, Officers, Soldiers, Seamen, Schoolmasters, Scholars; and other useful and entertaining Particulars too numerous to mention in this little Page",
         "author": "Brown, George",
         "date": "1778",
