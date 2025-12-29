@@ -17,7 +17,8 @@ on:
         description: "CSV global à compléter"
         required: true
         default: "data.csv"
-
+permissions:
+  contents: write
 jobs:
   append:
     runs-on: ubuntu-latest
