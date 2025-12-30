@@ -934,5 +934,13 @@
         "filename": "89.pdf",
         "edition": null,
         "pays": "British Isles"
+    },
+    {
+        "title": "Le Secrétaire des dames pour apprendre à écrire de belles lettres en langue française",
+        "author": "Anon.",
+        "date": "1759",
+        "filename": "101.pdf",
+        "edition": null,
+        "pays": "France"
     }
 ]
