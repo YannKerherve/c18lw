@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>C18LW - Dual OCR Fuzzy Phrase Search</title>
+    <style>
+        :root {
+            --bg: #f4f4f4; --panel: #fff; --muted: #666; --accent: #007bff;
+            --radius: 8px; --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; font-family: Arial, sans-serif; background: var(--bg); color: #333; }
+
+        .menu-wrapper { position: fixed; top: 1rem; left: 1rem; z-index: 2000; }
+        .menu-button {
+            display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.9);
+            color: black; border-radius: 0.5rem; padding: 0.5rem; box-shadow: var(--shadow); cursor: pointer; width: 60px; border: 1px solid #ddd;
+            transition: background 0.3s;
+        }
+        .menu-button:hover { background: #fff; }
+        .menu-button img { width: 2.5rem; height: 2.5rem; margin-bottom: 0.25rem; }
+        .menu-button span { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+
+        .menu-panel {
+            max-height: 0; overflow: hidden; transition: all 0.4s ease; margin-top: 0.5rem;
+            background: rgba(255, 255, 255, 0.98); border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 240px;
+            opacity: 0; pointer-events: none; border: 1px solid #ccc;
+        }
+        .menu-panel.open { max-height: 600px; opacity: 1; pointer-events: auto; padding: 0.75rem; }
+        .menu-section { display: flex; flex-direction: column; border-bottom: 1px solid #eee; padding: 5px 0; }
+        .menu-section a { padding: 0.5rem 0.75rem; border-radius: 0.25rem; color: black; text-decoration: none; font-size: 13px; }
+        .menu-section a:hover { background: #e5e7eb; }
+
+        .main-container { display: grid; grid-template-columns: 1fr 1fr; height: 100vh; gap: 10px; padding: 10px; }
+        .pdf-column { position: relative; display: flex; flex-direction: column; height: 100%; min-height: 0; gap: 8px; }
+
+        .panel { background: var(--panel); border-radius: var(--radius); border: 1px solid #ddd; box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; }
+        .viewer { flex: 2; overflow: auto; background: #555; position: relative; }
+        .ocr-res { flex: 1; overflow: auto; padding: 12px; font-size: 13px; font-family: monospace; border-top: 2px solid #eee; background: white; white-space: normal; line-height: 1.6; }
+
+        canvas { width: 100%; height: auto; display: block; }
+        mark { background: yellow; color: black; border-radius: 2px; }
+
+        .info-pos { position: absolute; top: 10px; right: 10px; z-index: 100; }
+        .cfg-pos { position: absolute; top: 105px; right: 10px; z-index: 50; }
+
+        .inner-config { font-size: 12px; }
+        .inner-config label { display: block; margin: 8px 0 4px; font-weight: bold; color: var(--muted); }
+        .inner-config input[type="number"] { width: 70px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
+        .inner-config button { width: 100%; margin-top: 8px; padding: 8px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        .meta-box { font-size: 12px; line-height: 1.6; color: #333; }
+        .meta-box b { color: var(--accent); display: block; margin-bottom: 6px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="menu-wrapper">
+    <div onclick="toggleMenu('mainMenu')" class="menu-button">
+        <img src="c18lw.png" alt="Logo"><span>Menu</span>
+    </div>
+    <div id="mainMenu" class="menu-panel">
+        <div class="menu-section">
+            <a href="index.htm">Home</a>
+            <a href="database.htm">Data Base</a>
+            <a href="resultatrecherche.htm">Advanced Search</a>
+        </div>
+        <div class="menu-section">
+            <a id="vpdf1" href="#">View PDF 1</a>
+            <a id="vocr1" href="#">View OCR 1</a>
+            <a id="vpdf2" href="#">View PDF 2</a>
+            <a id="vocr2" href="#">View OCR 2</a>
+        </div>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="pdf-column">
+        <div class="info-pos"><div onclick="toggleMenu('info1')" class="menu-button"><img src="info.png" alt="I"><span>Info</span></div><div id="info1" class="menu-panel meta-box" style="margin-left:-180px;">Loading...</div></div>
+        <div class="cfg-pos"><div onclick="toggleMenu('cfg1')" class="menu-button"><img src="engre.png" alt="C"><span>OCR</span></div><div id="cfg1" class="menu-panel inner-config" style="margin-left:-180px;"><label>Page</label><input type="number" id="p1_num" value="1"> / <span id="p1_total">0</span><label>Zoom: <span id="z1_val">2.00</span>x</label><input type="range" id="p1_zoom" min="1" max="3" step="0.25" value="2" style="width:100%"><button id="p1_rerun">Restart OCR</button></div></div>
+        <div class="panel viewer"><canvas id="canvas1"></canvas></div>
+        <div class="panel ocr-res" id="ocr1">...</div>
+    </div>
+    <div class="pdf-column">
+        <div class="info-pos"><div onclick="toggleMenu('info2')" class="menu-button"><img src="info.png" alt="I"><span>Info</span></div><div id="info2" class="menu-panel meta-box" style="margin-left:-180px;">Loading...</div></div>
+        <div class="cfg-pos"><div onclick="toggleMenu('cfg2')" class="menu-button"><img src="engre.png" alt="C"><span>OCR</span></div><div id="cfg2" class="menu-panel inner-config" style="margin-left:-180px;"><label>Page</label><input type="number" id="p2_num" value="1"> / <span id="p2_total">0</span><label>Zoom: <span id="z2_val">2.00</span>x</label><input type="range" id="p2_zoom" min="1" max="3" step="0.25" value="2" style="width:100%"><button id="p2_rerun">Restart OCR</button></div></div>
+        <div class="panel viewer"><canvas id="canvas2"></canvas></div>
+        <div class="panel ocr-res" id="ocr2">...</div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";</script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const rawQuery = params.get('query') || "";
+const query = decodeURIComponent(rawQuery).trim();
+
+const startP1 = parseInt(params.get('pagepdf1') || params.get('page1') || '1');
+const startP2 = parseInt(params.get('pagepdf2') || params.get('page2') || '1');
+
+const state = {
+    p1: { url: params.get('pdf1') || params.get('pdf'), doc: null, page: startP1, zoom: 2.0, canvas: document.getElementById('canvas1'), textEl: document.getElementById('ocr1'), info: document.getElementById('info1'), numInput: document.getElementById('p1_num') },
+    p2: { url: params.get('pdf2'), doc: null, page: startP2, zoom: 2.0, canvas: document.getElementById('canvas2'), textEl: document.getElementById('ocr2'), info: document.getElementById('info2'), numInput: document.getElementById('p2_num') }
+};
+
+function getSimilarity(s1, s2) {
+    let longer = s1.length < s2.length ? s2 : s1;
+    let shorter = s1.length < s2.length ? s1 : s2;
+    if (longer.length === 0) return 1.0;
+    const editDistance = (a, b) => {
+        let costs = [];
+        for (let i = 0; i <= a.length; i++) {
+            let lastValue = i;
+            for (let j = 0; j <= b.length; j++) {
+                if (i === 0) costs[j] = j;
+                else if (j > 0) {
+                    let newValue = costs[j - 1];
+                    if (a.charAt(i - 1) !== b.charAt(j - 1))
+                        newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                    costs[j - 1] = lastValue;
+                    lastValue = newValue;
+                }
+            }
+            if (i > 0) costs[b.length] = lastValue;
+        }
+        return costs[b.length];
+    };
+    return (longer.length - editDistance(longer, shorter)) / parseFloat(longer.length);
+}
+
+function toggleMenu(id) {
+    const el = document.getElementById(id);
+    const wasOpen = el.classList.contains('open');
+    document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('open'));
+    if(!wasOpen) el.classList.add('open');
+}
+
+async function initPDF(key) {
+    const s = state[key];
+    if (!s.url) { s.textEl.textContent = "No PDF."; return; }
+    try {
+        s.doc = await pdfjsLib.getDocument(s.url).promise;
+        document.getElementById(`${key}_total`).textContent = s.doc.numPages;
+        if(s.page > s.doc.numPages) s.page = s.doc.numPages;
+        s.numInput.value = s.page;
+        loadMeta(s.url, s.info);
+        render(key);
+    } catch (e) { s.textEl.textContent = "Error: " + e.message; }
+}
+
+async function render(key) {
+    const s = state[key];
+    const page = await s.doc.getPage(s.page);
+    const viewport = page.getViewport({ scale: s.zoom });
+    s.canvas.width = viewport.width;
+    s.canvas.height = viewport.height;
+    const ctx = s.canvas.getContext('2d');
+    ctx.clearRect(0, 0, s.canvas.width, s.canvas.height);
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    runOcr(key);
+}
+
+async function runOcr(key) {
+    const s = state[key];
+    const threshold = 0.75;
+    s.textEl.textContent = "OCR Processing...";
+
+    const { data } = await Tesseract.recognize(s.canvas, 'eng');
+    const ctx = s.canvas.getContext('2d');
+
+    // REDESSINER LE PDF SANS SURLIGNAGE AVANT CHAQUE CALCUL OCR POUR EVITER LES COUCHES
+    const page = await s.doc.getPage(s.page);
+    const viewport = page.getViewport({ scale: s.zoom });
+    ctx.clearRect(0, 0, s.canvas.width, s.canvas.height);
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    ctx.fillStyle = "rgba(255, 255, 0, 0.45)";
+
+    const cleanQuery = query.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ');
+    const queryWords = cleanQuery.split(' ');
+    const queryLen = queryWords.length;
+
+    let words = data.words;
+    let markIndices = new Set();
+
+    if (query && queryLen > 0) {
+        for (let i = 0; i <= words.length - queryLen; i++) {
+            let sequence = words.slice(i, i + queryLen)
+                                .map(w => w.text.toLowerCase().replace(/[^a-z0-9]/g, ''))
+                                .join(' ');
+
+            if (getSimilarity(sequence, cleanQuery) >= threshold) {
+                for (let j = 0; j < queryLen; j++) {
+                    markIndices.add(i + j);
+                    let w = words[i + j];
+                    // Dessiner le rectangle une seule fois par exécution
+                    ctx.fillRect(w.bbox.x0, w.bbox.y0, w.bbox.x1 - w.bbox.x0, w.bbox.y1 - w.bbox.y0);
+                }
+            }
+        }
+    }
+
+    // Affichage texte fluide (sans saut de ligne à chaque mot)
+    let htmlContent = "";
+    words.forEach((w, idx) => {
+        if (markIndices.has(idx)) {
+            htmlContent += `<mark>${w.text}</mark> `;
+        } else {
+            htmlContent += w.text + " ";
+        }
+    });
+
+    s.textEl.innerHTML = htmlContent.trim() || "(No text)";
+}
+
+function loadMeta(url, target) {
+    fetch('sec.txt').then(r => r.text()).then(text => {
+        let clean = text.trim();
+        if(!clean.startsWith('[')) clean = '[' + clean + ']';
+        let list = new Function(`return ${clean}`)();
+        const m = list.find(item => item.filename === url || url.includes(item.filename));
+        if(m) target.innerHTML = `<b>${m.title}</b>Author: ${m.author}<br>Date: ${m.date}<br>Pays: ${m.pays}`;
+    }).catch(() => {});
+}
+
+['p1', 'p2'].forEach(key => {
+    state[key].numInput.onchange = (e) => {
+        let v = parseInt(e.target.value);
+        if(v < 1) v = 1;
+        if(state[key].doc && v > state[key].doc.numPages) v = state[key].doc.numPages;
+        state[key].page = v; e.target.value = v;
+        render(key);
+    };
+    document.getElementById(`${key}_zoom`).oninput = (e) => {
+        state[key].zoom = parseFloat(e.target.value);
+        document.getElementById(`${key.replace('p','z')}_val`).textContent = state[key].zoom.toFixed(2);
+        render(key);
+    };
+    document.getElementById(`${key}_rerun`).onclick = () => render(key);
+});
+
+initPDF('p1');
+initPDF('p2');
+</script>
+</body>
+</html>
