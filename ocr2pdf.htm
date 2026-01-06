@@ -207,16 +207,31 @@ async function runOcr(key) {
     }
 
     // Affichage texte fluide (sans saut de ligne à chaque mot)
-    let htmlContent = "";
-    words.forEach((w, idx) => {
-        if (markIndices.has(idx)) {
-            htmlContent += `<mark>${w.text}</mark> `;
-        } else {
-            htmlContent += w.text + " ";
-        }
-    });
+let htmlContent = "";
+let buffer = [];
+let inMark = false;
 
-    s.textEl.innerHTML = htmlContent.trim() || "(No text)";
+words.forEach((w, idx) => {
+    if (markIndices.has(idx)) {
+        buffer.push(w.text);
+        inMark = true;
+    } else {
+        if (inMark) {
+            htmlContent += `<mark>${buffer.join(" ")}</mark> `;
+            buffer = [];
+            inMark = false;
+        }
+        htmlContent += w.text + " ";
+    }
+});
+
+// vider le buffer à la fin
+if (inMark && buffer.length) {
+    htmlContent += `<mark>${buffer.join(" ")}</mark> `;
+}
+
+s.textEl.innerHTML = htmlContent.trim() || "(No text)";
+
 }
 
 function loadMeta(url, target) {
