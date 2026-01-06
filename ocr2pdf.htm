@@ -239,7 +239,7 @@ function loadMeta(url, target) {
         let clean = text.trim();
         if(!clean.startsWith('[')) clean = '[' + clean + ']';
         let list = new Function(`return ${clean}`)();
-        const m = list.find(item => item.filename === url || url.includes(item.filename));
+        const m = list.find(item => item.filename === url);
         if(m) target.innerHTML = `<b>${m.title}</b>Author: ${m.author}<br>Date: ${m.date}<br>Pays: ${m.pays}`;
     }).catch(() => {});
 }
