@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>C18LW - Dual OCR Fuzzy Phrase Search</title>
+    <title>C18LW - Dual OCR</title>
     <link rel="icon" type="image/png" href="facion.png">
     <style>
         :root {
@@ -106,7 +106,7 @@ const startP2 = parseInt(params.get('pagepdf2') || params.get('page2') || '1');
 
 const state = {
     p1: { url: params.get('pdf1') || params.get('pdf'), doc: null, page: startP1, zoom: 2.0, canvas: document.getElementById('canvas1'), textEl: document.getElementById('ocr1'), info: document.getElementById('info1'), numInput: document.getElementById('p1_num') },
-    p2: { url: params.get('pdf2'), doc: null, page: startP2, zoom: 2.0, canvas: document.getElementById('canvas2'), textEl: document.getElementById('ocr2'), info: document.getElementById('info2'), numInput: document.getElementById('p2_num') }
+    p2: { url: params.get('pdf2') || params.get('pdf'), doc: null, page: startP2, zoom: 2.0, canvas: document.getElementById('canvas2'), textEl: document.getElementById('ocr2'), info: document.getElementById('info2'), numInput: document.getElementById('p2_num') }
 };
 
 function getSimilarity(s1, s2) {
