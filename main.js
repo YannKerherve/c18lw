@@ -202,7 +202,7 @@ function showInfo(pdfId){
         // On prépare un aperçu du texte (les 3 premiers max pour ne pas surcharger)
         const textPreview = group.snippets.slice(0, 3).map(t => `“${t}”`).join(" <br> ");
         const moreCount = group.snippets.length - 3;
-        const moreLabel = moreCount > 0 ? `<span class="text-xs text-gray-400 mt-1 block">(+ ${moreCount} autres passages sur cette page)</span>` : "";
+        const moreLabel = moreCount > 0 ? `<span class="text-xs text-gray-400 mt-1 block">(+ ${moreCount} other elements on that page)</span>` : "";
 
         html += `
             <div class="mb-4 p-4 bg-[#f5f5f5] rounded-xl border border-gray-200">
@@ -222,7 +222,7 @@ function showInfo(pdfId){
                     <a href="${url}"
                        target="_blank"
                        class="inline-block px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-150 ease-in-out shadow-sm text-center no-underline">
-                        Voir les points communs
+                        See similarities
                     </a>
                 </div>
             </div>
