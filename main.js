@@ -208,7 +208,7 @@ function showInfo(pdfId){
             <div class="mb-4 p-4 bg-[#f5f5f5] rounded-xl border border-gray-200">
 
                 <div class="font-bold text-gray-700 mb-2 border-b border-gray-300 pb-1 flex justify-between">
-                     <span>P.${group.page1} (Cible)</span>
+                     <span>P.${group.page1} (Target)</span>
                      <span>↔</span>
                      <span>P.${group.page2} (Source)</span>
                 </div>
