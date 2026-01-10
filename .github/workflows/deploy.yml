@@ -16,9 +16,14 @@ jobs:
       - name: Install Supabase CLI
         run: |
           curl -fsSL https://cli.supabase.com/install.sh | sh
+          echo "$HOME/.supabase/bin" >> $GITHUB_PATH
+
+      - name: Check Supabase CLI
+        run: supabase --version
 
       - name: Deploy to Supabase
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: supabase deploy ./  # ./ = racine du repo
+        run: |
+          supabase deploy ./
