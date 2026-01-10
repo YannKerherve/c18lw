@@ -1,0 +1,36 @@
+name: Deploy to Supabase
+
+on:
+  push:
+    branches:
+      - main   # ou la branche que tu utilises
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install  # si tu utilises un build JS/React
+        working-directory: ./frontend  # adapte si besoin
+
+      - name: Build project
+        run: npm run build
+        working-directory: ./frontend  # adapte selon ton projet
+
+      - name: Deploy to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          npm install -g supabase
+          supabase login --service-role-key $SUPABASE_SERVICE_KEY
+          supabase deploy ./frontend/dist  # chemin vers ton build
