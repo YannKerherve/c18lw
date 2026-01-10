@@ -8,12 +8,14 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Install Supabase CLI
-        run: npm install -g supabase
+        run: |
+          curl -fsSL https://cli.supabase.com/install.sh | sh
 
       - name: Deploy to Supabase
         env:
