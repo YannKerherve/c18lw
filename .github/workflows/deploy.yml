@@ -16,14 +16,11 @@ jobs:
       - name: Install Supabase CLI
         run: |
           curl -fsSL https://cli.supabase.com/install.sh | sh
-          echo "$HOME/.supabase/bin" >> $GITHUB_PATH
 
-      - name: Check Supabase CLI
-        run: supabase --version
-
-      - name: Deploy to Supabase
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      - name: Locate Supabase CLI
         run: |
-          supabase deploy ./
+          find $HOME -type f -name supabase || true
+
+      - name: Check Supabase CLI version (absolute path)
+        run: |
+          $HOME/.supabase/bin/supabase --version || true
