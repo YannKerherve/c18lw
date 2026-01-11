@@ -1,26 +1,26 @@
-name: Deploy to Supabase
+# name: Deploy to Supabase
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
 
-      - name: Install Supabase CLI
-        run: |
-          curl -fsSL https://cli.supabase.com/install.sh | sh
+#       - name: Install Supabase CLI
+#         run: |
+#           curl -fsSL https://cli.supabase.com/install.sh | sh
 
-      - name: Locate Supabase CLI
-        run: |
-          find $HOME -type f -name supabase || true
+#       - name: Locate Supabase CLI
+#         run: |
+#           find $HOME -type f -name supabase || true
 
-      - name: Check Supabase CLI version (absolute path)
-        run: |
-          $HOME/.supabase/bin/supabase --version || true
+#       - name: Check Supabase CLI version (absolute path)
+#         run: |
+#           $HOME/.supabase/bin/supabase --version || true
