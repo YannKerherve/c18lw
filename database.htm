@@ -1530,33 +1530,57 @@
     populateCountryFilter();
     applyFilters();
 </script>
-  <script>
-    const toggleBtn = document.getElementById('menuToggle');
-    const menu = document.getElementById('menuContent');
-
-    toggleBtn.addEventListener('click', () => {
-      menu.classList.toggle('open');
-    });
-  </script>
 <script>
-  // Instanciation globale
-  const SUPABASE_URL = "https://vxcgquyvndvnnzpvbabw.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+  // 1. Configuration - On utilise des noms de constantes uniques
+  const SB_URL = "https://vxcgquyvndvnnzpvbabw.supabase.co";
+  const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4Y2dxdXl2bmR2bm56cHZiYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNjUyNDYsImV4cCI6MjA4MzY0MTI0Nn0.yUi9FBmQHR85doK7CyIS2VFyzZXavmD_dbNcKPEp0A4"; // Gardez votre clé complète ici
 
-  // ✅ Variable globale
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // 2. Initialisation du client (On change 'supabase' en 'sbClient')
+  // Note : On utilise 'supabase.createClient' car 'supabase' est l'objet de la bibliothèque CDN
+  const sbClient = supabase.createClient(SB_URL, SB_KEY);
 
-  // Protection de la page
+  // 3. Fonction pour ouvrir le PDF via le Worker
+  // Définie en haut pour être accessible par le HTML
+  async function openPdf(pdfName) {
+    const { data: { session } } = await sbClient.auth.getSession();
+
+    if (!session) {
+      alert("Please log in to view this document.");
+      window.location.href = "login.htm";
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://pdf-protect-c18lw.ya-kerherve.workers.dev/pdf/${pdfName}`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        window.open(url);
+      } else {
+        alert('Access denied: You are not authorized to view this PDF.');
+      }
+    } catch (err) {
+      console.error("Worker error:", err);
+      alert("Error connecting to the PDF server.");
+    }
+  }
+
+  // 4. Protection de la page
   async function protectPage() {
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const { data: { session }, error } = await sbClient.auth.getSession();
 
+    // Redirige si pas de session
     if (error || !session) {
       window.location.href = "login.htm";
       return;
     }
 
+    // Vérifie l'approbation du profil
     const user = session.user;
-    const { data, error: profileError } = await supabase
+    const { data, error: profileError } = await sbClient
       .from("profiles")
       .select("approved")
       .eq("id", user.id)
@@ -1564,35 +1588,18 @@
 
     if (profileError || !data || data.approved !== true) {
       alert("Your account is not yet approved by the administrator.");
-      await supabase.auth.signOut();
+      await sbClient.auth.signOut();
       window.location.href = "login.htm";
     }
   }
 
+  // Lancement de la vérification au chargement
   protectPage();
-
-  // Fonction pour ouvrir le PDF via le Worker
-  async function openPdf(pdfName) {
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) return alert("Please log in");
-
-    const res = await fetch(`https://pdf-protect-c18lw.ya-kerherve.workers.dev/pdf/${pdfName}`, {
-      headers: { 'Authorization': `Bearer ${session.access_token}` }
-    });
-
-    if (res.ok) {
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      window.open(url);
-    } else {
-      alert('You are not authorized to view this PDF.');
-    }
-  }
 </script>
 
 </body>
 </html>
+
 
 
 
