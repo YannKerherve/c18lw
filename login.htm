@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +6,10 @@
     <title>Login & Sign Up - Eighteenth-Century Letter-writers</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- AJOUT : Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -13,7 +17,7 @@
             color: #333333;
         }
         .hero-bg {
-            background-image: url('img1.jpg'); /* Using your project's background image */
+            background-image: url('img1.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -28,12 +32,10 @@
 
     <header class="bg-[#fcfcfc] bg-opacity-90 backdrop-blur-sm sticky top-0 z-40 p-4">
         <div class="container mx-auto flex items-center justify-between">
-            <!-- Logo gauche -->
             <a href="index.htm" class="flex-shrink-0">
                 <img src="c18lw.png" alt="Logo du site" class="w-12 h-12 rounded-lg">
             </a>
 
-            <!-- Navigation principale -->
             <nav class="hidden md:flex items-center space-x-8 text-lg font-medium">
                 <a href="index.htm#projects" class="hover:text-[#6b7280] transition-colors duration-200">Project</a>
                 <a href="index.htm#features" class="hover:text-[#6b7280] transition-colors duration-200">Features</a>
@@ -41,7 +43,6 @@
                 <a href="credits.htm" class="hover:text-[#6b7280] transition-colors duration-200">Contact</a>
             </nav>
 
-            <!-- Logo droit -->
             <a href="https://www.univ-brest.fr/hcti/en" class="flex-shrink-0">
                 <img src="hcti.png" alt="Logo HCTI" class="h-12 rounded-lg">
             </a>
@@ -58,12 +59,6 @@
                 <p class="text-[#9ca3af] text-sm leading-relaxed mb-8">
                     Join our community of researchers and enthusiasts. Create an account to access the database.
                 </p>
-                <div class="space-y-4">
-                    <div class="flex items-center space-x-3 text-xs uppercase tracking-widest text-[#9ca3af]">
-                        <span class="w-8 h-px bg-[#6b7280]"></span>
-                        <span>Exploring the historical past with modern technology.</span>
-                    </div>
-                </div>
             </div>
 
             <div class="md:w-7/12 p-10 bg-[#fcfcfc]">
@@ -72,16 +67,17 @@
                     <h3 class="text-2xl font-bold mb-2">Sign In</h3>
                     <p class="text-[#6b7280] text-sm mb-8">Welcome back to the 18th Century.</p>
 
-                    <form class="space-y-5">
+                    <!-- AJOUT onsubmit -->
+                    <form class="space-y-5" onsubmit="login(event)">
                         <div>
                             <label class="block text-xs font-bold uppercase text-[#333333] mb-1">Email Address</label>
-                            <input type="email" placeholder="email@institution.edu" class="w-full px-4 py-3 bg-[#f5f5f5] border border-gray-200 rounded-lg focus:outline-none focus:border-[#333333] transition-all">
+                            <input id="login-email" type="email" placeholder="email@institution.edu" class="w-full px-4 py-3 bg-[#f5f5f5] border border-gray-200 rounded-lg focus:outline-none focus:border-[#333333] transition-all">
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase text-[#333333] mb-1">Password</label>
-                            <input type="password" placeholder="••••••••" class="w-full px-4 py-3 bg-[#f5f5f5] border border-gray-200 rounded-lg focus:outline-none focus:border-[#333333] transition-all">
+                            <input id="login-password" type="password" placeholder="••••••••" class="w-full px-4 py-3 bg-[#f5f5f5] border border-gray-200 rounded-lg focus:outline-none focus:border-[#333333] transition-all">
                         </div>
-                        <button type="submit" class="w-full py-3 bg-[#333333] text-[#fcfcfc] font-bold rounded-lg hover:bg-[#6b7280] transition-colors shadow-lg">
+                        <button class="w-full py-3 bg-[#333333] text-[#fcfcfc] font-bold rounded-lg hover:bg-[#6b7280] transition-colors shadow-lg">
                             Login
                         </button>
                     </form>
@@ -98,20 +94,21 @@
                     <h3 class="text-2xl font-bold mb-2">Create Account</h3>
                     <p class="text-[#6b7280] text-sm mb-8">Register to explore the database.</p>
 
-                    <form class="space-y-4">
+                    <!-- AJOUT onsubmit -->
+                    <form class="space-y-4" onsubmit="signup(event)">
                         <div>
                             <label class="block text-xs font-bold uppercase text-[#333333] mb-1">Full Name</label>
-                            <input type="text" placeholder="Johnathan Swift" class="w-full px-4 py-3 bg-[#f5f5f5] border border-gray-200 rounded-lg focus:outline-none focus:border-[#333333]">
+                            <input id="signup-name" type="text" placeholder="Johnathan Swift" class="w-full px-4 py-3 bg-[#f5f5f5] border border-gray-200 rounded-lg focus:outline-none focus:border-[#333333]">
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase text-[#333333] mb-1">Email Address</label>
-                            <input type="email" placeholder="researcher@example.com" class="w-full px-4 py-3 bg-[#f5f5f5] border border-gray-200 rounded-lg focus:outline-none focus:border-[#333333]">
+                            <input id="signup-email" type="email" placeholder="researcher@example.com" class="w-full px-4 py-3 bg-[#f5f5f5] border border-gray-200 rounded-lg focus:outline-none focus:border-[#333333]">
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase text-[#333333] mb-1">Password</label>
-                            <input type="password" placeholder="••••••••" class="w-full px-4 py-3 bg-[#f5f5f5] border border-gray-200 rounded-lg focus:outline-none focus:border-[#333333]">
+                            <input id="signup-password" type="password" placeholder="••••••••" class="w-full px-4 py-3 bg-[#f5f5f5] border border-gray-200 rounded-lg focus:outline-none focus:border-[#333333]">
                         </div>
-                        <button type="submit" class="w-full py-3 bg-[#333333] text-[#fcfcfc] font-bold rounded-lg hover:bg-[#6b7280] transition-colors shadow-lg">
+                        <button class="w-full py-3 bg-[#333333] text-[#fcfcfc] font-bold rounded-lg hover:bg-[#6b7280] transition-colors shadow-lg">
                             Join Project
                         </button>
                     </form>
@@ -128,11 +125,67 @@
         </div>
     </main>
 
-
     <script>
         function toggleAuth() {
             document.getElementById('login-section').classList.toggle('hidden');
             document.getElementById('signup-section').classList.toggle('hidden');
+        }
+
+        /* AJOUT : Supabase logic */
+        const supabaseClient = supabase.createClient(
+          "https://XXXXX.supabase.co",
+          "PUBLIC_ANON_KEY"
+        )
+
+        function showMessage(text, isError = false) {
+          alert(text)
+        }
+
+        async function login(event) {
+          event.preventDefault()
+
+          const email = document.getElementById("login-email").value
+          const password = document.getElementById("login-password").value
+
+          const { error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+          })
+
+          if (error) {
+            showMessage(error.message, true)
+            return
+          }
+
+          const { data, error: profileError } = await supabaseClient
+            .from("profiles")
+            .select("approved")
+            .single()
+
+          if (profileError || !data.approved) {
+            showMessage("Account not yet approved.")
+            return
+          }
+
+          window.location.href = "/database.htm"
+        }
+
+        async function signup(event) {
+          event.preventDefault()
+
+          const email = document.getElementById("signup-email").value
+          const password = document.getElementById("signup-password").value
+
+          const { error } = await supabaseClient.auth.signUp({
+            email,
+            password
+          })
+
+          if (error) {
+            showMessage(error.message, true)
+          } else {
+            showMessage("Account created. Awaiting approval.")
+          }
         }
     </script>
 </body>
