@@ -1,3 +1,4 @@
+
 <!-- Created: 26/08/2025 by Yann Kerhervé -->
 <!-- Last Version 20/10/2025 including highlight functions -->
 <!DOCTYPE html>
@@ -366,6 +367,11 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <script>
+
+
+let ocrLang = 'eng';        // langue Tesseract
+let grammarLang = 'en-US'; // langue LanguageTool
+
 const $=sel=>document.querySelector(sel);
 const pageNumber=$('#pageNumber'), pageSlider=$('#pageSlider'), pageCountEl=$('#pageCount');
 const pdfCanvas=$('#pdfCanvas'), ocrText=$('#ocrText'), statusEl=$('#status');
@@ -428,7 +434,7 @@ function cacheKey(num=currentPage){ return `${num}-eng-${scale.toFixed(2)}`; }
 // --------- OCR ----------
 async function applyAiCorrection(text){
   try{
-    const resp=await fetch("https://api.languagetool.org/v2/check",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({text:text,language:"en-US"})});
+    const resp=await fetch("https://api.languagetool.org/v2/check",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({text:text,language:grammarLang})});
     const result=await resp.json();
     let corrected=text;
     result.matches.sort((a,b)=>b.offset-a.offset).forEach(m=>{
@@ -443,7 +449,7 @@ async function runOcr(force=false){
   if(!force && pageCache.has(key)){ ocrText.textContent=pageCache.get(key); statusEl.textContent='Depuis cache.'; return; }
   statusEl.textContent='OCR en cours…';
   try{
-    const {data}=await Tesseract.recognize(pdfCanvas,'eng',{logger:m=>{if(m.status)statusEl.textContent=`${m.status} ${m.progress?Math.round(m.progress*100)+'%':''}`;}});
+    const {data}=await Tesseract.recognize(pdfCanvas,ocrLang,{logger:m=>{if(m.status)statusEl.textContent=`${m.status} ${m.progress?Math.round(m.progress*100)+'%':''}`;}});
     let text=(data && data.text ? data.text.trim() : '');
     text=await applyAiCorrection(text);
     pageCache.set(key,text);
@@ -588,13 +594,23 @@ if(pdfUrl){
       let metadataList=eval(pythonLike);
       const meta=metadataList.find(m=>m.filename===pdfUrl);
       const box=document.getElementById('metadataBox');
-      if(meta){
-        box.innerHTML=`
+      if (meta) {
+        // --- Choix langue OCR ---
+        if (meta.pays && meta.pays.toLowerCase() === 'france') {
+          ocrLang = 'fra';
+          grammarLang = 'fr';
+        } else {
+          ocrLang = 'eng';
+          grammarLang = 'en-US';
+        }
+      
+        box.innerHTML = `
           <strong>Title:</strong> ${meta.title}<br>
           <strong>Author:</strong> ${meta.author}<br>
           <strong>Date:</strong> ${meta.date}<br>
           <strong>Edition:</strong> ${meta.edition}<br>
-          <strong>Country:</strong> ${meta.pays}
+          <strong>Country:</strong> ${meta.pays}<br>
+          <strong>OCR language:</strong> ${ocrLang.toUpperCase()}
         `;
       } else {
         box.textContent="No metadata found for this file.";
@@ -647,8 +663,6 @@ if(pdfUrl){
 </script>
 </body>
 </html>
-
-
 
 
 
