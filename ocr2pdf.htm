@@ -55,6 +55,7 @@
         .meta-box { font-size: 12px; line-height: 1.6; color: #333; }
         .meta-box b { color: var(--accent); display: block; margin-bottom: 6px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
     </style>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -262,6 +263,45 @@ function loadMeta(url, target) {
 
 initPDF('p1');
 initPDF('p2');
+</script>
+    <script>
+  // Utilisation de variables locales pour éviter les conflits globaux
+  (function() {
+    const SB_URL = "https://vxcgquyvndvnnzpvbabw.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4Y2dxdXl2bmR2bm56cHZiYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNjUyNDYsImV4cCI6MjA4MzY0MTI0Nn0.yUi9FBmQHR85doK7CyIS2VFyzZXavmD_dbNcKPEp0A4";
+
+    // ✅ On change le nom de la constante pour éviter l'erreur "already declared"
+    // On accède à l'objet de la bibliothèque via "supabase.createClient" 
+    // car le CDN expose l'objet 'supabase'
+    const myAppClient = supabase.createClient(SB_URL, SB_KEY);
+
+    async function protectPage() {
+      // 1. Vérifier si l'utilisateur est connecté
+      const { data: { session }, error } = await myAppClient.auth.getSession();
+
+      if (error || !session) {
+        window.location.href = "login.htm";
+        return;
+      }
+
+      // 2. Vérifier si le profil est approuvé
+      const user = session.user;
+      const { data, error: profileError } = await myAppClient
+        .from("profiles")
+        .select("approved")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !data || data.approved !== true) {
+        alert("Your account is not yet approved by the administrator.");
+        await myAppClient.auth.signOut();
+        window.location.href = "login.htm";
+      }
+    }
+
+    // Lancer la protection au chargement
+    protectPage();
+  })();
 </script>
 </body>
 </html>
