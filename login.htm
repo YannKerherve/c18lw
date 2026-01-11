@@ -168,7 +168,12 @@
             return
           }
 
-          window.location.href = "/database.htm"
+          // On vérifie s'il y a une page précédente dans l'historique
+         if (document.referrer && document.referrer !== window.location.href) {
+             window.location.href = document.referrer;
+         } else {
+             window.location.href = "database.htm"; // Repli au cas où
+         }
         }
 
         async function signup(event) {
