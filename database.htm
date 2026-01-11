@@ -1538,16 +1538,14 @@
       menu.classList.toggle('open');
     });
   </script>
-
-
 <script>
-  // ===============================
-  // AUTH GUARD – DATABASE ACCESS
-  // ===============================
-  const supabase = supabase.createClient(
-          "https://vxcgquyvndvnnzpvbabw.supabase.co",
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4Y2dxdXl2bmR2bm56cHZiYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNjUyNDYsImV4cCI6MjA4MzY0MTI0Nn0.yUi9FBmQHR85doK7CyIS2VFyzZXavmD_dbNcKPEp0A4"
-        )
+  const SUPABASE_URL = "https://vxcgquyvndvnnzpvbabw.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4Y2dxdXl2bmR2bm56cHZiYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNjUyNDYsImV4cCI6MjA4MzY0MTI0Nn0.yUi9FBmQHR85doK7CyIS2VFyzZXavmD_dbNcKPEp0A4";
+
+  // ✅ Crée un client Supabase unique
+  const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Auth guard
   async function protectPage() {
     const { data: { session }, error } = await supabase.auth.getSession();
 
@@ -1573,9 +1571,9 @@
 
   protectPage();
 </script>
-
 </body>
 </html>
+
 
 
 
