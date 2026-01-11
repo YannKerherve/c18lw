@@ -1,0 +1,212 @@
+
+
+<!-- Created: 28/08/2025 by Yann Kerhervé -->
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eighteenth-Century Letter-writers</title>
+    <link rel="icon" type="image/png" href="facion.png">
+    <!-- Chargement de la police Inter et de Tailwind CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Styles de base pour l'ensemble de la page */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfcfc; /* Blanc presque pur */
+            color: #333333; /* Gris foncé pour le texte */
+        }
+        /* Style pour le bouton fixe en bas à gauche */
+        .fixed-btn {
+            position: fixed;
+            bottom: 1.5rem; /* Espace depuis le bas */
+            left: 1.5rem;  /* Espace depuis la gauche */
+            z-index: 50;  /* Pour qu'il reste au-dessus des autres éléments */
+        }
+        /* Style pour la section hero avec l'image de fond */
+        .hero-section {
+            background-image: url('img1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body class="bg-[#fcfcfc] text-[#333333]">
+
+    <!-- Bouton flottant "to data base" -->
+    <a href="database.htm" class="fixed-btn px-6 py-3 bg-[#e5e7eb] text-[#333333] font-bold rounded-full shadow-lg hover:bg-[#d1d5db] transition-colors duration-300 transform hover:scale-105">
+        To data base
+    </a>
+
+    <!-- Section d'en-tête (Header) -->
+    <header class="bg-[#fcfcfc] bg-opacity-90 backdrop-blur-sm sticky top-0 z-40 p-4">
+        <div class="container mx-auto flex items-center justify-between">
+            <!-- Logo gauche -->
+            <a href="index.htm" class="flex-shrink-0">
+                <img src="c18lw.png" alt="Logo du site" class="w-12 h-12 rounded-lg">
+            </a>
+
+            <!-- Navigation principale -->
+            <nav class="hidden md:flex items-center space-x-8 text-lg font-medium">
+                <a href="index.htm#projects" class="hover:text-[#6b7280] transition-colors duration-200">Project</a>
+                <a href="index.htm#features" class="hover:text-[#6b7280] transition-colors duration-200">Features</a>
+                <a href="database.htm" class="px-5 py-2 bg-[#333333] text-[#fcfcfc] rounded-full hover:bg-[#6b7280] transition-colors duration-300">To data base</a>
+                <a href="credits.htm" class="hover:text-[#6b7280] transition-colors duration-200">Contact</a>
+            </nav>
+
+            <!-- Logo droit -->
+            <a href="https://www.univ-brest.fr/hcti/en" class="flex-shrink-0">
+                <img src="hcti.png" alt="Logo HCTI" class="h-12 rounded-lg">
+            </a>
+        </div>
+    </header>
+
+    <!-- Section principale -->
+    <main>
+        <!-- Section Héro -->
+        <section class="hero-section h-screen relative flex items-center justify-center text-center">
+            <div class="absolute inset-0 bg-black opacity-10"></div>
+            <div class="relative max-w-3xl p-8 md:p-12 bg-white bg-opacity-80 backdrop-blur-sm rounded-3xl shadow-2xl">
+                <h1 class="text-4xl md:text-6xl font-extrabold text-[#333333] leading-tight">
+                    Eighteenth-Century Letter-writers
+                </h1>
+                <p class="mt-4 text-xl md:text-2xl text-[#6b7280] font-medium">
+                    Explore the rich world of historical correspondence.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section Projects -->
+        <section id="projects" class="py-20 bg-[#f5f5f5]">
+            <div class="container mx-auto px-6 md:px-12 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold text-[#333333]">
+                    The Project
+                </h2>
+                <p class="mt-4 text-lg md:text-xl max-w-3xl mx-auto text-[#6b7280]">
+                    The "Eighteenth-Century Letter-writers" project is a digital initiative dedicated to preserving and exploring the world of 18th-century English correspondence. The objective is to make these invaluable historical documents accessible and searchable to researchers and enthusiasts alike.
+                </p>
+                <div class="mt-12 w-full max-w-4xl mx-auto rounded-x0 shadow-xl overflow-hidden">
+                    <a href='database.htm'> <img src="search.png" alt="Image du projet" class="w-full h-auto object-cover" ></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Features -->
+        <section id="features" class="py-20 bg-[#fcfcfc]">
+            <div class="container mx-auto px-6 md:px-12 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold text-[#333333]">
+                    Key Features
+                </h2>
+                <div class="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+
+                    <!-- Carte de fonctionnalité 2: Recherche par filtres -->
+                    <a href='database.htm'><div class="p-8 bg-[#f5f5f5] rounded-2xl shadow-lg transition-transform transform hover:scale-105">
+                        <h3 class="text-2xl font-bold text-[#333333] mb-3">
+                            Filter Search
+                        </h3>
+                        <p class="text-[#6b7280]">
+                            Refine your results with intuitive filters. Narrow down thousands of documents to exactly what you need with just a few clicks.
+                        </p>
+                    </div></a>
+
+                    <!-- Carte de fonctionnalité 1: Recherche avancée -->
+                    <a href='resultatrecherche.htm'><div class="p-8 bg-[#f5f5f5] rounded-2xl shadow-lg transition-transform transform hover:scale-105">
+                        <h3 class="text-2xl font-bold text-[#333333] mb-3">
+                            Advanced Search
+                        </h3>
+                        <p class="text-[#6b7280]">
+                            Uncover specific letters with powerful, multi-parameter queries. Search by author, recipient, date, location, and more.
+                        </p>
+                    </div></a>
+
+
+
+                    <!-- Carte de fonctionnalité 3: Consultation des PDFs -->
+                    <a href='biblio.htm'> <div class="p-8 bg-[#f5f5f5] rounded-2xl shadow-lg transition-transform transform hover:scale-105">
+                        <h3 class="text-2xl font-bold text-[#333333] mb-3">
+                            Bibliographic Ressources
+                        </h3>
+                        <p class="text-[#6b7280]">
+                           Select bibliography of secondary sources on eighteenth-century letter-writing manuals, to be updated.
+                        </p>
+                    </div></a>
+
+                    <!-- Carte de fonctionnalité 4: Consultation des textes -->
+                     <a href='gallery.htm'><div class="p-8 bg-[#f5f5f5] rounded-2xl shadow-lg transition-transform transform hover:scale-105">
+                        <h3 class="text-2xl font-bold text-[#333333] mb-3">
+                            Gallery
+                        </h3>
+                        <p class="text-[#6b7280]">
+                            Pictures of the frontispieces of eighteenth-century letter-writing manuals
+                        </p>
+                    </div></a>
+
+                    <!-- Carte de fonctionnalité 5: Consultation PDF + Texte -->
+                    <a href='database.htm'><div class="p-8 bg-[#f5f5f5] rounded-2xl shadow-lg transition-transform transform hover:scale-105">
+                        <h3 class="text-2xl font-bold text-[#333333] mb-3">
+                            PDF + Text (OCR) Consultation
+                        </h3>
+                        <p class="text-[#6b7280]">
+                            Compare the original PDF with its transcribed text side-by-side. OCR technology ensures accurate and synchronised viewing of both versions.
+                        </p>
+
+                    </div></a>
+                    <!-- Carte de fonctionnalité 6: Compraison de PDF -->
+                    <a href='database.htm'><div class="p-8 bg-[#f5f5f5] rounded-2xl shadow-lg transition-transform transform hover:scale-105">
+                        <h3 class="text-2xl font-bold text-[#333333] mb-3">
+                            PDF Comparison
+                        </h3>
+                        <p class="text-[#6b7280]">
+                            Compare the original PDF with another original PDF. Ideal for multi-versions books.
+                        </p>
+                    </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Pied de page (Footer) -->
+    <footer class="bg-[#333333] text-[#fcfcfc] py-12">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <!-- Logos et navigation -->
+                <div class="flex items-center space-x-6 md:space-x-8">
+                    <img src="c18lwblanc.png" alt="Logo du site" class="w-20 h-20 rounded-lg">
+                    <img src="hctiblanc.png" alt="Logo HCTI" class="w-12 rounded-lg">
+                </div>
+
+                <!-- Navigation du pied de page -->
+                <nav class="mt-8 md:mt-0 flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8 text-lg font-medium">
+                    <a href="index.htm#projects" class="hover:text-[#9ca3af] transition-colors duration-200">Project</a>
+                    <a href="index.htm#features" class="hover:text-[#9ca3af] transition-colors duration-200">Features</a>
+                    <a href="database.htm" class="hover:text-[#9ca3af] transition-colors duration-200">To data base</a>
+                    <a href="credits.htm" class="hover:text-[#9ca3af] transition-colors duration-200">Contact</a>
+                </nav>
+            </div>
+            <!-- Texte de copyright -->
+            <div class="mt-8 text-center text-sm text-[#9ca3af]">
+                © 2025-2026 A. Kerhervé - HCTI - All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
