@@ -1544,24 +1544,14 @@
   // AUTH GUARD – DATABASE ACCESS
   // ===============================
 
-  const SUPABASE_URL = "https://TON_PROJET.supabase.co";
-  const SUPABASE_ANON_KEY = "TON_PUBLIC_ANON_KEY";
-
-  const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
-
   async function protectPage() {
     const { data: { session }, error } = await supabase.auth.getSession();
 
     if (error || !session) {
-      // Pas connecté → retour login
       window.location.href = "login.htm";
       return;
     }
 
-    // Optionnel : vérifier si l’utilisateur est approved
     const user = session.user;
 
     const { data, error: profileError } = await supabase
@@ -1582,6 +1572,7 @@
 
 </body>
 </html>
+
 
 
 
