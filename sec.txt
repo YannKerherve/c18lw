@@ -8,7 +8,7 @@
         "pays": "British Isles"
     },
     {
-        "title": "The Accomplished Letter-Writer; or, Universal Correspondent, Containing Familiar Letters on the Most Common Occasions in Life. Also a Variety of more Elegant Letters for Examples and Improvement of Style, from the best Modern Authors, together with Many Originals, on Business, Duty, Amusement, Affection, Courtship, Marriage, Friendship, and Other Subjects. ",
+        "title": "The Accomplished Letter-Writer; or, Universal Correspondent, Containing Familiar Letters on the Most Common Occasions in Life. Also a Variety of more Elegant Letters for Examples and Improvement of Style, from the best Modern Authors, together with Many Originals, on Business, Duty, Amusement, Affection, Courtship, Marriage, Friendship, and Other Subjects.",
         "author": "Anon.",
         "date": "1779",
         "filename": "2.pdf",
@@ -952,5 +952,6 @@
         "pays": "France"
     }
 ]
+
 
 
