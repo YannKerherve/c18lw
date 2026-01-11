@@ -1541,32 +1541,36 @@
 
   // 3. Fonction pour ouvrir le PDF via le Worker
   // Définie en haut pour être accessible par le HTML
-  async function openPdf(pdfName) {
-    const { data: { session } } = await sbClient.auth.getSession();
+async function openPdf(pdfName) {
+  const { data: { session } } = await sbClient.auth.getSession();
 
-    if (!session) {
-      alert("Please log in to view this document.");
-      window.location.href = "login.htm";
-      return;
-    }
-
-    try {
-      const res = await fetch(`https://pdf-protect-c18lw.ya-kerherve.workers.dev/pdf/${pdfName}`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
-
-      if (res.ok) {
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        window.open(url);
-      } else {
-        alert('Access denied: You are not authorized to view this PDF.');
-      }
-    } catch (err) {
-      console.error("Worker error:", err);
-      alert("Error connecting to the PDF server.");
-    }
+  if (!session) {
+    alert("Please log in to view this document.");
+    window.location.href = "login.htm";
+    return;
   }
+
+  try {
+    const res = await fetch(`https://pdf-protect-c18lw.ya-kerherve.workers.dev/pdf/${pdfName}`, {
+      headers: { 'Authorization': `Bearer ${session.access_token}` }
+    });
+
+    if (res.ok) {
+      const data = await res.json(); // On récupère le JSON { url: "..." }
+      if (data.url) {
+        window.open(data.url, '_blank'); // On ouvre le lien généré
+      } else {
+        throw new Error("URL non trouvée dans la réponse");
+      }
+    } else {
+      const errorData = await res.text();
+      alert('Access denied: ' + errorData);
+    }
+  } catch (err) {
+    console.error("Worker error:", err);
+    alert("Error: Document not found or server unreachable.");
+  }
+}
 
   // 4. Protection de la page
   async function protectPage() {
@@ -1599,6 +1603,7 @@
 
 </body>
 </html>
+
 
 
 
