@@ -1539,66 +1539,61 @@
     });
   </script>
 <script>
-  // Utilisation de variables locales pour éviter les conflits globaux
-  (function() {
-    const SB_URL = "https://vxcgquyvndvnnzpvbabw.supabase.co";
-    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4Y2dxdXl2bmR2bm56cHZiYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNjUyNDYsImV4cCI6MjA4MzY0MTI0Nn0.yUi9FBmQHR85doK7CyIS2VFyzZXavmD_dbNcKPEp0A4";
+  // Instanciation globale
+  const SUPABASE_URL = "https://vxcgquyvndvnnzpvbabw.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
 
-    // ✅ On change le nom de la constante pour éviter l'erreur "already declared"
-    // On accède à l'objet de la bibliothèque via "supabase.createClient" 
-    // car le CDN expose l'objet 'supabase'
-    const myAppClient = supabase.createClient(SB_URL, SB_KEY);
+  // ✅ Variable globale
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function protectPage() {
-      // 1. Vérifier si l'utilisateur est connecté
-      const { data: { session }, error } = await myAppClient.auth.getSession();
+  // Protection de la page
+  async function protectPage() {
+    const { data: { session }, error } = await supabase.auth.getSession();
 
-      if (error || !session) {
-        window.location.href = "login.htm";
-        return;
-      }
-
-      // 2. Vérifier si le profil est approuvé
-      const user = session.user;
-      const { data, error: profileError } = await myAppClient
-        .from("profiles")
-        .select("approved")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError || !data || data.approved !== true) {
-        alert("Your account is not yet approved by the administrator.");
-        await myAppClient.auth.signOut();
-        window.location.href = "login.htm";
-      }
+    if (error || !session) {
+      window.location.href = "login.htm";
+      return;
     }
 
-    // Lancer la protection au chargement
-    protectPage();
-  })();
-</script>
-    <script>
-async function openPdf(pdfName) {
-  const { data: { session } } = await supabase.auth.getSession();
+    const user = session.user;
+    const { data, error: profileError } = await supabase
+      .from("profiles")
+      .select("approved")
+      .eq("id", user.id)
+      .single();
 
-  if (!session) return alert("Please log in");
-
-  const res = await fetch(`https://pdf-protect-c18lw.ya-kerherve.workers.dev/pdf/${pdfName}`, {
-    headers: { 'Authorization': `Bearer ${session.access_token}` }
-  });
-
-  if (res.ok) {
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    window.open(url);
-  } else {
-    alert('You are not authorized to view this PDF.');
+    if (profileError || !data || data.approved !== true) {
+      alert("Your account is not yet approved by the administrator.");
+      await supabase.auth.signOut();
+      window.location.href = "login.htm";
+    }
   }
-}
+
+  protectPage();
+
+  // Fonction pour ouvrir le PDF via le Worker
+  async function openPdf(pdfName) {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) return alert("Please log in");
+
+    const res = await fetch(`https://pdf-protect-c18lw.ya-kerherve.workers.dev/pdf/${pdfName}`, {
+      headers: { 'Authorization': `Bearer ${session.access_token}` }
+    });
+
+    if (res.ok) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url);
+    } else {
+      alert('You are not authorized to view this PDF.');
+    }
+  }
 </script>
 
 </body>
 </html>
+
 
 
 
