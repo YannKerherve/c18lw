@@ -1538,12 +1538,24 @@
       menu.classList.toggle('open');
     });
   </script>
+<script>
+  const SUPABASE_URL = "https://XXXX.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOi...";
+
+  const supabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+</script>
 
 <script>
   // ===============================
   // AUTH GUARD – DATABASE ACCESS
   // ===============================
-
+  const supabaseClient = supabase.createClient(
+          "https://vxcgquyvndvnnzpvbabw.supabase.co",
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4Y2dxdXl2bmR2bm56cHZiYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNjUyNDYsImV4cCI6MjA4MzY0MTI0Nn0.yUi9FBmQHR85doK7CyIS2VFyzZXavmD_dbNcKPEp0A4"
+        )
   async function protectPage() {
     const { data: { session }, error } = await supabase.auth.getSession();
 
@@ -1572,6 +1584,7 @@
 
 </body>
 </html>
+
 
 
 
