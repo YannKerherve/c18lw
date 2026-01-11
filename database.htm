@@ -1600,9 +1600,17 @@ async function openPdf(pdfName) {
   // Lancement de la vérification au chargement
   protectPage();
 </script>
+  <script>
+    const toggleBtn = document.getElementById('menuToggle');
+    const menu = document.getElementById('menuContent');
 
+    toggleBtn.addEventListener('click', () => {
+      menu.classList.toggle('open');
+    });
+  </script>
 </body>
 </html>
+
 
 
 
