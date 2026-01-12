@@ -181,13 +181,13 @@ function showInfo(pdfId){
             ${truncateTitle(meta.title, 15)}
         </h2>
         <div class="space-y-1 text-sm text-[#374151]">
-            <p><strong>Auteur:</strong> ${meta.author || "—"}</p>
+            <p><strong>Author:</strong> ${meta.author || "—"}</p>
             <p><strong>Date:</strong> ${meta.date || ""}</p>
-            <p><strong>Fichier:</strong> ${meta.filename}</p>
+            <p><strong>File:</strong> ${meta.filename}</p>
         </div>
         <hr class="my-6">
         <h3 class="text-lg font-semibold mb-4">
-            Pages correspondantes (${Object.keys(groups).length})
+            Related pages (${Object.keys(groups).length})
         </h3>
     `;
 
