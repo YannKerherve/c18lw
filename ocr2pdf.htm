@@ -104,12 +104,36 @@ const query = decodeURIComponent(rawQuery).trim();
 
 const startP1 = parseInt(params.get('pagepdf1') || params.get('page1') || '1');
 const startP2 = parseInt(params.get('pagepdf2') || params.get('page2') || '1');
+    
+const SB_URL = "https://vxcgquyvndvnnzpvbabw.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4Y2dxdXl2bmR2bm56cHZiYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNjUyNDYsImV4cCI6MjA4MzY0MTI0Nn0.yUi9FBmQHR85doK7CyIS2VFyzZXavmD_dbNcKPEp0A4";
+const WORKER_URL = "https://pdf-protect-c18lw.ya-kerherve.workers.dev/pdf/";
 
+const myAppClient = supabase.createClient(SB_URL, SB_KEY);
+    
 const state = {
     p1: { url: params.get('pdf1') || params.get('pdf'), doc: null, page: startP1, zoom: 2.0, canvas: document.getElementById('canvas1'), textEl: document.getElementById('ocr1'), info: document.getElementById('info1'), numInput: document.getElementById('p1_num') },
     p2: { url: params.get('pdf2') || params.get('pdf'), doc: null, page: startP2, zoom: 2.0, canvas: document.getElementById('canvas2'), textEl: document.getElementById('ocr2'), info: document.getElementById('info2'), numInput: document.getElementById('p2_num') }
 };
+    
+async function fetchSecureUrl(pdfName) {
+    if (!pdfName) return null;
+    const { data: { session } } = await myAppClient.auth.getSession();
+    if (!session) return null;
 
+    try {
+        const res = await fetch(`${WORKER_URL}${pdfName}`, {
+            headers: { 'Authorization': `Bearer ${session.access_token}` }
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.url;
+    } catch (err) {
+        console.error("Worker error:", err);
+        return null;
+    }
+}
+    
 function getSimilarity(s1, s2) {
     let longer = s1.length < s2.length ? s2 : s1;
     let shorter = s1.length < s2.length ? s1 : s2;
@@ -145,14 +169,28 @@ function toggleMenu(id) {
 async function initPDF(key) {
     const s = state[key];
     if (!s.url) { s.textEl.textContent = "No PDF."; return; }
+    
+    s.textEl.textContent = "Requesting secure access...";
+    
+    // On demande l'URL signée au Worker
+    const secureUrl = await fetchSecureUrl(s.url);
+    
+    if (!secureUrl) {
+        s.textEl.textContent = "Access Denied or Connection Error.";
+        return;
+    }
+
     try {
-        s.doc = await pdfjsLib.getDocument(s.url).promise;
+        // On utilise l'URL signée pour pdf.js
+        s.doc = await pdfjsLib.getDocument(secureUrl).promise;
         document.getElementById(`${key}_total`).textContent = s.doc.numPages;
         if(s.page > s.doc.numPages) s.page = s.doc.numPages;
         s.numInput.value = s.page;
-        loadMeta(s.url, s.info);
+        loadMeta(s.url, s.info); // On garde le nom original pour les métadonnées
         render(key);
-    } catch (e) { s.textEl.textContent = "Error: " + e.message; }
+    } catch (e) { 
+        s.textEl.textContent = "Error: " + e.message; 
+    }
 }
 
 async function render(key) {
