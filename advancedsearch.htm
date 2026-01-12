@@ -421,7 +421,7 @@ function fuzzySearch(query, content, tolerance) {
 
 
         // Chargement du fichier CSV au démarrage
-        fetch('http://yannkerherve.github.io/c18lw/data.csv')
+        fetch('https://yannkerherve.github.io/c18lw/data.csv')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('The data.csv file could not be loaded.');
