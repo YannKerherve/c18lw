@@ -222,39 +222,71 @@
 
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const ouvrage1 = params.get('ouvrage1');
-            const ouvrage2 = params.get('ouvrage2');
+<script>
+    // Configuration identique au reste du site
+    const SB_URL = "https://vxcgquyvndvnnzpvbabw.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4Y2dxdXl2bmR2bm56cHZiYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNjUyNDYsImV4cCI6MjA4MzY0MTI0Nn0.yUi9FBmQHR85doK7CyIS2VFyzZXavmD_dbNcKPEp0A4"; // Votre clé
+    const WORKER_URL = "https://pdf-protect-c18lw.ya-kerherve.workers.dev/pdf/";
+    const sbClient = supabase.createClient(SB_URL, SB_KEY);
 
-            const viewer1 = document.getElementById('pdf-viewer-1');
-            const viewer2 = document.getElementById('pdf-viewer-2');
-            const title1 = document.getElementById('title-1');
-            const title2 = document.getElementById('title-2');
+    async function fetchSecureUrl(pdfName) {
+        const { data: { session } } = await sbClient.auth.getSession();
+        if (!session) return null;
 
-            // Set up viewer for ouvrage 1
-            if (ouvrage1) {
-                viewer1.src = ouvrage1;
-                title1.textContent = ouvrage1; // Display the filename as the title
+        try {
+            const res = await fetch(`${WORKER_URL}${pdfName}`, {
+                headers: { 'Authorization': `Bearer ${session.access_token}` }
+            });
+            if (!res.ok) return null;
+            const data = await res.json();
+            return data.url; // L'URL signée générée par le Worker
+        } catch (err) {
+            console.error("Error fetching secure URL:", err);
+            return null;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        const ouvrage1 = params.get('ouvrage1');
+        const ouvrage2 = params.get('ouvrage2');
+
+        const viewer1 = document.getElementById('pdf-viewer-1');
+        const viewer2 = document.getElementById('pdf-viewer-2');
+        const title1 = document.getElementById('title-1');
+        const title2 = document.getElementById('title-2');
+
+        // Chargement Ouvrage 1
+        if (ouvrage1) {
+            title1.textContent = "Loading " + ouvrage1 + "...";
+            const url = await fetchSecureUrl(ouvrage1);
+            if (url) {
+                viewer1.src = url;
+                title1.textContent = ouvrage1;
             } else {
-                title1.textContent = "No works selected";
-                viewer1.style.display = 'none';
+                title1.textContent = "Access Denied (Book 1)";
             }
+        } else {
+            title1.textContent = "No work selected";
+            viewer1.style.display = 'none';
+        }
 
-            // Set up viewer for ouvrage 2
-            if (ouvrage2) {
-                viewer2.src = ouvrage2;
-                title2.textContent = ouvrage2; // Display the filename as the title
+        // Chargement Ouvrage 2
+        if (ouvrage2) {
+            title2.textContent = "Loading " + ouvrage2 + "...";
+            const url = await fetchSecureUrl(ouvrage2);
+            if (url) {
+                viewer2.src = url;
+                title2.textContent = ouvrage2;
             } else {
-                title2.textContent = "No works selected";
-                viewer2.style.display = 'none';
+                title2.textContent = "Access Denied (Book 2)";
             }
-
-            // Optional: You can fetch the full titles from your data if needed
-            // For now, it just displays the filenames as titles.
-        });
-    </script>
+        } else {
+            title2.textContent = "No work selected";
+            viewer2.style.display = 'none';
+        }
+    });
+</script>
  <!--- <script>
     const toggleBtn = document.getElementById('menuToggle');
     const menu = document.getElementById('menuContent');
@@ -392,4 +424,5 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 
 </html>
+
 
