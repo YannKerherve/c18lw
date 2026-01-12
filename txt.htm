@@ -189,7 +189,7 @@
             viewtxtElement.href = `txt.htm?pdf=${filename}`;
             viewocrElement.href = `ocr.htm?pdf=${filename}`;
             // --- DEBUT : SIMULATION DU FICHIER CSV ---
-            // Remplacez ce bloc par une requête `fetch` vers votre fichier data.csv
+            // Remplacez ce bloc par une requête `fetch` vers votre fichier 
             //const mockCsvData = [
             //    '1.pdf;"Première page du manuel 1.pdf. Ce texte est un exemple de contenu de page.";"Deuxième page du manuel 1.pdf. Il s\'agit d\'une autre section du livre.";"Troisième page de ce livre. La fin."',
             //    '2.pdf;"Contenu de la page 1 du manuel 2.pdf.";"Page 2 du manuel 2.pdf.";"Page 3 du manuel 2.pdf."',
@@ -198,7 +198,7 @@
             // --- FIN : SIMULATION DU FICHIER CSV ---
 
             // Pour utiliser un vrai fichier, remplacez le bloc ci-dessus par :
-              fetch('data.csv')
+              fetch('http://yannkerherve.github.io/c18lw/data.csv')
                   .then(response => {
                       if (!response.ok) {
                           throw new Error('The data.csv file could not be loaded.');
@@ -347,6 +347,7 @@ fetch('sec.txt')
 </body>
 
 </html>
+
 
 
 
