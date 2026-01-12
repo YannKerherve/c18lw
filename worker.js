@@ -14,7 +14,7 @@ onmessage = async e => {
     sendProgress(5);
 
     // 2. Chargement du CSV
-    const csvText = await fetch("data.csv").then(r => r.text());
+    const csvText = await fetch("http://yannkerherve.github.io/c18lw/data.csv").then(r => r.text());
     sendProgress(10);
 
     // --- META DICTIONARY ---
