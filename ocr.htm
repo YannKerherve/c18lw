@@ -388,7 +388,28 @@ const pageCache=new Map();
 const params=new URLSearchParams(window.location.search);
 const pdfUrl=params.get('pdf');
 let startPage=parseInt(params.get('page')||'1',10);
+// --- Configuration Worker ---
+const WORKER_URL = "https://pdf-protect-c18lw.ya-kerherve.workers.dev/pdf/";
 
+// Fonction pour obtenir l'URL signée du Worker
+async function fetchSecureUrl(pdfName) {
+  // On utilise myAppClient défini dans votre IIFE ou sbClient
+  // Assurez-vous que myAppClient est accessible ou créez-en un ici
+  const { data: { session } } = await myAppClient.auth.getSession();
+  if (!session) return null;
+
+  try {
+    const res = await fetch(`${WORKER_URL}${pdfName}`, {
+      headers: { 'Authorization': `Bearer ${session.access_token}` }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.url;
+  } catch (err) {
+    console.error("Worker connection error:", err);
+    return null;
+  }
+}
 // --------- PDF Handling ----------
 pageNumber.addEventListener('change', onPageNumberChange);
 pageSlider.addEventListener('input', onPageSliderChange);
@@ -396,7 +417,19 @@ zoom.addEventListener('input', ()=>{scale=parseFloat(zoom.value);zoomVal.textCon
 rerunBtn.addEventListener('click',()=>runOcr(true));
 aiBtn.addEventListener('click',async()=>{ocrText.textContent=await applyAiCorrection(ocrText.textContent);});
 
-if(pdfUrl){ openPdf(pdfUrl); }
+// Remplacez l'ancien bloc d'ouverture par celui-ci
+if (pdfUrl) {
+  (async () => {
+    statusEl.textContent = 'Requesting secure access...';
+    const secureUrl = await fetchSecureUrl(pdfUrl);
+    
+    if (secureUrl) {
+      openPdf(secureUrl);
+    } else {
+      statusEl.textContent = 'Access Denied: Could not verify permissions.';
+    }
+  })();
+}
 
 viewpdfElement.href = `${pdfUrl}`;
 viewtxtElement.href = `txt.htm?pdf=${pdfUrl}`;
@@ -663,6 +696,7 @@ if(pdfUrl){
 </script>
 </body>
 </html>
+
 
 
 
