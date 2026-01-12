@@ -406,7 +406,7 @@ button:hover {
         searchButton.addEventListener('click', performSearch);
         searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') performSearch(); });
 
-        fetch('http://yannkerherve.github.io/c18lw/data.csv').then(r => r.text()).then(t => { data = parseCSV(t); }).catch(e => console.error(e));
+        fetch('https://yannkerherve.github.io/c18lw/data.csv').then(r => r.text()).then(t => { data = parseCSV(t); }).catch(e => console.error(e));
         fetch('sec.txt').then(r => r.text()).then(t => {
             let pl = t.trim();
             metadataList = eval(pl.startsWith('[') ? pl : '[' + pl + ']');
